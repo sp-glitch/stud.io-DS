@@ -1,0 +1,2487 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>stud.io 디자인 시스템</title>
+<link rel="icon" type="image/png" href="assets/images/favicon.png" />
+<link rel="apple-touch-icon" href="assets/images/favicon.png" />
+<link rel="stylesheet" href="assets/css/style.css" />
+<script>
+/* 첫 페인트 전에 테마를 확정해 흰 화면이 번쩍이지 않게 합니다.
+   저장값이 없으면 OS 설정을 따르고, 그 값을 그대로 data-theme 에 적어 둡니다.
+   덕분에 CSS 에는 다크 블록이 [data-theme="dark"] 하나만 있으면 됩니다. */
+(function () {
+  var saved = null;
+  try { saved = localStorage.getItem('studio-theme'); } catch (e) {}
+  var dark = saved ? saved === 'dark'
+                   : window.matchMedia('(prefers-color-scheme: dark)').matches;
+  document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+})();
+</script>
+</head>
+
+<body>
+
+<div class="app">
+
+  <div class="overlay" id="overlay"></div>
+
+  <!-- ======================= 좌측 사이드바 ======================= -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar__brand">
+      <img class="sidebar__logo sidebar__logo--light" src="assets/images/logo/logo.png" alt="stud.io" width="191" height="50" />
+      <img class="sidebar__logo sidebar__logo--dark" src="assets/images/logo/logo-dark.png" alt="stud.io" width="191" height="50" />
+      <span class="sidebar__badge">DS</span>
+    </div>
+
+    <nav class="nav" id="nav">
+
+      <div class="nav__group">
+        <p class="nav__category">시작하기</p>
+        <a class="nav__link" href="#intro"><span class="icon">article</span>개요</a>
+      </div>
+      <div class="nav__group">
+        <p class="nav__category">파운데이션</p>
+        <a class="nav__link" href="#color"><span class="icon">palette</span>컬러</a>
+        <a class="nav__link" href="#type"><span class="icon">text_fields</span>타이포그래피</a>
+      </div>
+      <div class="nav__group">
+        <p class="nav__category">기본 (범용)</p>
+        <a class="nav__link" href="#button"><span class="icon">smart_button</span>버튼</a>
+        <a class="nav__link" href="#button-link"><span class="icon">link</span>링크 버튼</a>
+        <a class="nav__link" href="#tag"><span class="icon">sell</span>태그</a>
+        <a class="nav__link" href="#series-label"><span class="icon">bookmarks</span>시리즈 라벨</a>
+        <a class="nav__link" href="#tooltip"><span class="icon">help</span>툴팁</a>
+        <a class="nav__link" href="#date-text"><span class="icon">calendar_today</span>날짜 텍스트</a>
+        <a class="nav__link" href="#next-image"><span class="icon">image</span>이미지 · 링크</a>
+        <a class="nav__link" href="#switch"><span class="icon">toggle_on</span>스위치</a>
+      </div>
+      <div class="nav__group">
+        <p class="nav__category">폼 · 입력</p>
+        <a class="nav__link" href="#input-field"><span class="icon">edit_square</span>입력 필드</a>
+        <a class="nav__link" href="#label"><span class="icon">label</span>라벨</a>
+        <a class="nav__link" href="#dropdown"><span class="icon">expand_circle_down</span>드롭다운</a>
+      </div>
+      <div class="nav__group">
+        <p class="nav__category">피드백 · 표시</p>
+        <a class="nav__link" href="#star-rating"><span class="icon">star</span>별점</a>
+        <a class="nav__link" href="#progress"><span class="icon">linear_scale</span>진행바</a>
+        <a class="nav__link" href="#not-found"><span class="icon">search_off</span>빈 목록</a>
+        <a class="nav__link" href="#alert"><span class="icon">notification_important</span>알림창</a>
+        <a class="nav__link" href="#empty-state"><span class="icon">inbox</span>빈 상태</a>
+        <a class="nav__link" href="#status-badge"><span class="icon">verified</span>상태 뱃지</a>
+        <a class="nav__link" href="#avatar"><span class="icon">account_circle</span>아바타</a>
+      </div>
+      <div class="nav__group">
+        <p class="nav__category">네비게이션</p>
+        <a class="nav__link" href="#tabs"><span class="icon">tab</span>탭</a>
+        <a class="nav__link" href="#slider"><span class="icon">view_carousel</span>슬라이드</a>
+        <a class="nav__link" href="#pagination"><span class="icon">format_list_numbered</span>페이지네이션</a>
+        <a class="nav__link" href="#view-all"><span class="icon">title</span>섹션 헤더</a>
+        <a class="nav__link" href="#search-bar"><span class="icon">search</span>검색바</a>
+        <a class="nav__link" href="#category-filter"><span class="icon">filter_alt</span>카테고리 필터</a>
+        <a class="nav__link" href="#sort-dropdown"><span class="icon">sort</span>정렬 드롭다운</a>
+      </div>
+      <div class="nav__group">
+        <p class="nav__category">레이아웃</p>
+        <a class="nav__link" href="#sidebar-comp"><span class="icon">view_sidebar</span>사이드바</a>
+        <a class="nav__link" href="#mystudio-sidebar"><span class="icon">account_box</span>마이스튜디오 사이드바</a>
+        <a class="nav__link" href="#header-footer"><span class="icon">web_asset</span>헤더 · 푸터</a>
+        <a class="nav__link" href="#main-banner"><span class="icon">wallpaper</span>메인 배너</a>
+        <a class="nav__link" href="#live-bar"><span class="icon">live_tv</span>라이브 콘텐츠 바</a>
+      </div>
+      <div class="nav__group">
+        <p class="nav__category">모달 · 오버레이</p>
+        <a class="nav__link" href="#modal-portal"><span class="icon">layers</span>모달 포탈</a>
+        <a class="nav__link" href="#postcode-modal"><span class="icon">markunread_mailbox</span>우편번호 검색 모달</a>
+      </div>
+      <div class="nav__group">
+        <p class="nav__category">콘텐츠 카드</p>
+        <a class="nav__link" href="#content-box"><span class="icon">smart_display</span>영상 카드</a>
+        <a class="nav__link" href="#elearning-box"><span class="icon">school</span>이러닝 카드</a>
+        <a class="nav__link" href="#shorts-box"><span class="icon">smartphone</span>클립 카드</a>
+        <a class="nav__link" href="#upcoming-box"><span class="icon">schedule</span>공개 예정 카드</a>
+        <a class="nav__link" href="#prev-content"><span class="icon">history</span>이전 콘텐츠 박스</a>
+      </div>
+      <div class="nav__group">
+        <p class="nav__category">상세 화면</p>
+        <a class="nav__link" href="#video-detail"><span class="icon">play_circle</span>영상 상세</a>
+        <a class="nav__link" href="#curriculum"><span class="icon">format_list_bulleted</span>커리큘럼 목록</a>
+        <a class="nav__link" href="#rec-series"><span class="icon">playlist_play</span>추천 시리즈</a>
+        <a class="nav__link" href="#review-list"><span class="icon">reviews</span>리뷰 목록</a>
+        <a class="nav__link" href="#review-modal"><span class="icon">rate_review</span>리뷰 작성</a>
+        <a class="nav__link" href="#tutor-profile"><span class="icon">person</span>강사 프로필</a>
+      </div>
+      <div class="nav__group">
+        <p class="nav__category">모달 · 결제</p>
+        <a class="nav__link" href="#terms-modal"><span class="icon">policy</span>약관 · 안내 모달</a>
+        <a class="nav__link" href="#payment"><span class="icon">receipt_long</span>결제 요약</a>
+      </div>
+      <div class="nav__group">
+        <p class="nav__category">네비 · 필터</p>
+        <a class="nav__link" href="#segmented"><span class="icon">view_week</span>커스텀 탭</a>
+        <a class="nav__link" href="#faq"><span class="icon">quiz</span>FAQ 아코디언</a>
+      </div>
+      <div class="nav__group">
+        <p class="nav__category">배지</p>
+        <a class="nav__link" href="#badge"><span class="icon">signal_cellular_alt</span>난이도 배지</a>
+      </div>
+      <div class="nav__group">
+        <p class="nav__category">기타 · 유틸</p>
+        <a class="nav__link" href="#utils"><span class="icon">build</span>기타 · 유틸 컴포넌트</a>
+      </div>
+
+    </nav>
+
+    <div class="sidebar__foot">stud.io Design System<br />v1.2 · SUIT</div>
+  </aside>
+
+  <!-- ======================= 우측 본문 ======================= -->
+  <div class="main">
+
+    <header class="topbar">
+      <div class="topbar__inner">
+        <div class="topbar__left">
+          <button class="menu-btn" id="menuBtn" type="button" aria-label="메뉴 열기">
+            <span class="icon">menu</span>
+          </button>
+          <span class="topbar__title">디자인 시스템</span>
+          <span class="topbar__divider"></span>
+          <span class="topbar__crumb" id="crumb">개요</span>
+        </div>
+        <div class="topbar__right">
+          <span class="topbar__meta">한국능률협회 · KMA</span>
+          <button class="theme-btn" id="themeBtn" type="button" aria-pressed="false" aria-label="테마 전환">
+            <span class="icon icon--sm theme-btn__icon theme-btn__icon--moon">dark_mode</span>
+            <span class="icon icon--sm theme-btn__icon theme-btn__icon--sun">light_mode</span>
+            <span class="theme-btn__label" id="themeLabel">다크</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main class="content" id="content">
+      <div class="page">
+
+        <!-- ==================== 개요 ==================== -->
+        <section class="section" id="intro">
+          <div class="hero">
+            <p class="eyebrow">STUD.IO DESIGN SYSTEM</p>
+            <h1 class="hero__title">디자인 가이드</h1>
+            <hr class="hero__rule" />
+            <p class="hero__lead">
+              홈 · 오리지널 · 브리프 · 피드 · 이러닝까지, stud.io의 모든 화면은 같은 컬러와 같은 여백,
+              같은 컴포넌트로 만들어집니다. 이 문서는 실제 서비스 화면에서 쓰이는 규칙을 한곳에 정리한 가이드입니다.
+            </p>
+            <dl class="hero__meta">
+              <div><dt>브랜드 컬러</dt><dd class="is-brand">#7EE8C7</dd></div>
+              <div><dt>기본 서체</dt><dd>SUIT</dd></div>
+              <div><dt>타입 스케일</dt><dd>7단계</dd></div>
+              <div><dt>모드</dt><dd>일반 · LXP · 강사</dd></div>
+              <div><dt>최종 수정</dt><dd>2026.07.29</dd></div>
+            </dl>
+          </div>
+        </section>
+
+        <!-- ==================== 컬러 ==================== -->
+        <section class="section" id="color">
+          <div class="section__head">
+            <p class="eyebrow">파운데이션</p>
+            <h2 class="section__title">컬러</h2>
+            <p class="section__desc">
+              브랜드 컬러는 <strong>Mint와 Ink 단 두 개</strong>입니다.
+              그 외 모든 색은 <strong>뉴트럴(구조) · 서브(시리즈 식별) · 상태(피드백)</strong>로 분류하며,
+              분류를 넘어 쓰지 않습니다.
+            </p>
+          </div>
+
+          <div class="card">
+            <div class="card__head">
+              <p class="card__title">컬러 팔레트</p>
+              <span class="card__hint">클릭하면 값 복사</span>
+            </div>
+
+            <div class="card__body card__body--palette">
+
+              <div class="swatch-group">
+                <div class="swatch-group__head">
+                  <p class="swatch-group__name">① 코어 브랜드 — 2개</p>
+                  <p class="swatch-group__desc">이 두 색만 브랜드입니다</p>
+                </div>
+                <div class="grid grid--swatch">
+                  <button class="swatch" type="button" data-value="#7EE8C7">
+                    <span class="swatch__color sw-brand"></span>
+                    <span class="swatch__meta">
+                      <span class="swatch__name">Mint · 브랜드</span>
+                      <span class="swatch__value">#7EE8C7</span>
+                      <span class="swatch__value">--color-brand</span>
+                    </span>
+                  </button>
+                  <button class="swatch" type="button" data-value="#111111">
+                    <span class="swatch__color sw-ink"></span>
+                    <span class="swatch__meta">
+                      <span class="swatch__name">Ink · 먹</span>
+                      <span class="swatch__value">#111111</span>
+                      <span class="swatch__value">--color-ink</span>
+                    </span>
+                  </button>
+                </div>
+              </div>
+
+              <div class="swatch-group">
+                <div class="swatch-group__head">
+                  <p class="swatch-group__name">② 브랜드 명도 단계</p>
+                  <p class="swatch-group__desc">Mint에서 파생 · 새로운 색이 아닙니다</p>
+                </div>
+                <div class="grid grid--swatch">
+                  <button class="swatch" type="button" data-value="#EDFBF5">
+                    <span class="swatch__color sw-brand-50 has-edge"></span>
+                    <span class="swatch__meta"><span class="swatch__name">Brand 50</span><span class="swatch__value">#EDFBF5</span><span class="swatch__value">연한 배경</span></span>
+                  </button>
+                  <button class="swatch" type="button" data-value="#A9EDD3">
+                    <span class="swatch__color sw-brand-200"></span>
+                    <span class="swatch__meta"><span class="swatch__name">Brand 200</span><span class="swatch__value">#A9EDD3</span><span class="swatch__value">테두리</span></span>
+                  </button>
+                  <button class="swatch" type="button" data-value="#7EE8C7">
+                    <span class="swatch__color sw-brand"></span>
+                    <span class="swatch__meta"><span class="swatch__name">Brand 400</span><span class="swatch__value">#7EE8C7</span><span class="swatch__value">채움 · 기준값</span></span>
+                  </button>
+                  <button class="swatch" type="button" data-value="#0E9A73">
+                    <span class="swatch__color sw-brand-600"></span>
+                    <span class="swatch__meta"><span class="swatch__name">Brand 600</span><span class="swatch__value">#0E9A73</span><span class="swatch__value">흰 배경 위 글자</span></span>
+                  </button>
+                  <button class="swatch" type="button" data-value="#07704F">
+                    <span class="swatch__color sw-brand-700"></span>
+                    <span class="swatch__meta"><span class="swatch__name">Brand 700</span><span class="swatch__value">#07704F</span><span class="swatch__value">강조 텍스트</span></span>
+                  </button>
+                </div>
+              </div>
+
+              <div class="swatch-group">
+                <div class="swatch-group__head">
+                  <p class="swatch-group__name">③ 뉴트럴</p>
+                  <p class="swatch-group__desc">배경 · 경계선 · 텍스트 위계 전담</p>
+                </div>
+                <div class="grid grid--swatch">
+                  <button class="swatch" type="button" data-value="#FFFFFF">
+                    <span class="swatch__color sw-gray-0 has-edge"></span>
+                    <span class="swatch__meta"><span class="swatch__name">Gray 0</span><span class="swatch__value">#FFFFFF</span><span class="swatch__value">본문 배경</span></span>
+                  </button>
+                  <button class="swatch" type="button" data-value="#F7F7F8">
+                    <span class="swatch__color sw-gray-25 has-edge"></span>
+                    <span class="swatch__meta"><span class="swatch__name">Gray 25</span><span class="swatch__value">#F7F7F8</span><span class="swatch__value">사이드바 배경</span></span>
+                  </button>
+                  <button class="swatch" type="button" data-value="#F2F4F6">
+                    <span class="swatch__color sw-gray-100"></span>
+                    <span class="swatch__meta"><span class="swatch__name">Gray 100</span><span class="swatch__value">#F2F4F6</span><span class="swatch__value">표 구분선</span></span>
+                  </button>
+                  <button class="swatch" type="button" data-value="#E5E8EB">
+                    <span class="swatch__color sw-gray-200"></span>
+                    <span class="swatch__meta"><span class="swatch__name">Gray 200</span><span class="swatch__value">#E5E8EB</span><span class="swatch__value">카드 테두리</span></span>
+                  </button>
+                  <button class="swatch" type="button" data-value="#D1D6DB">
+                    <span class="swatch__color sw-gray-300"></span>
+                    <span class="swatch__meta"><span class="swatch__name">Gray 300</span><span class="swatch__value">#D1D6DB</span><span class="swatch__value">버튼 테두리</span></span>
+                  </button>
+                  <button class="swatch" type="button" data-value="#8B95A1">
+                    <span class="swatch__color sw-gray-500"></span>
+                    <span class="swatch__meta"><span class="swatch__name">Gray 500</span><span class="swatch__value">#8B95A1</span><span class="swatch__value">플레이스홀더 · 중립</span></span>
+                  </button>
+                  <button class="swatch" type="button" data-value="#4E5968">
+                    <span class="swatch__color sw-gray-700"></span>
+                    <span class="swatch__meta"><span class="swatch__name">Gray 700</span><span class="swatch__value">#4E5968</span><span class="swatch__value">서브 본문</span></span>
+                  </button>
+                  <button class="swatch" type="button" data-value="#191F28">
+                    <span class="swatch__color sw-gray-900"></span>
+                    <span class="swatch__meta"><span class="swatch__name">Gray 900</span><span class="swatch__value">#191F28</span><span class="swatch__value">본문 텍스트</span></span>
+                  </button>
+                </div>
+              </div>
+
+              <div class="swatch-group">
+                <div class="swatch-group__head">
+                  <p class="swatch-group__name">④ 서브 — 시리즈 식별</p>
+                  <p class="swatch-group__desc">시리즈 라벨에만 사용 · UI 상태에 쓰지 않음</p>
+                </div>
+                <div class="grid grid--swatch">
+                  <button class="swatch" type="button" data-value="#C28E39">
+                    <span class="swatch__color sw-sub-gold"></span>
+                    <span class="swatch__meta"><span class="swatch__name">Gold</span><span class="swatch__value">#C28E39</span><span class="swatch__value">최고경영자조찬회</span></span>
+                  </button>
+                  <button class="swatch" type="button" data-value="#F26D23">
+                    <span class="swatch__color sw-sub-orange"></span>
+                    <span class="swatch__meta"><span class="swatch__name">Orange</span><span class="swatch__value">#F26D23</span><span class="swatch__value">리더스포럼</span></span>
+                  </button>
+                  <button class="swatch" type="button" data-value="#68DF83">
+                    <span class="swatch__color sw-sub-green"></span>
+                    <span class="swatch__meta"><span class="swatch__name">Green</span><span class="swatch__value">#68DF83</span><span class="swatch__value">특별한클라스</span></span>
+                  </button>
+                </div>
+              </div>
+
+              <div class="swatch-group">
+                <div class="swatch-group__head">
+                  <p class="swatch-group__name">⑤ 상태 — 4단계 고정</p>
+                  <p class="swatch-group__desc">성공은 브랜드 Mint를 재사용합니다</p>
+                </div>
+                <div class="grid grid--swatch">
+                  <button class="swatch" type="button" data-value="#7EE8C7">
+                    <span class="swatch__color sw-brand"></span>
+                    <span class="swatch__meta"><span class="swatch__name">Success</span><span class="swatch__value">#7EE8C7</span><span class="swatch__value">공개 · 완료</span></span>
+                  </button>
+                  <button class="swatch" type="button" data-value="#F0C674">
+                    <span class="swatch__color sw-warning"></span>
+                    <span class="swatch__meta"><span class="swatch__name">Warning</span><span class="swatch__value">#F0C674</span><span class="swatch__value">검수중 · 주의</span></span>
+                  </button>
+                  <button class="swatch" type="button" data-value="#FF6B6B">
+                    <span class="swatch__color sw-danger"></span>
+                    <span class="swatch__meta"><span class="swatch__name">Danger</span><span class="swatch__value">#FF6B6B</span><span class="swatch__value">비공개 · 오류</span></span>
+                  </button>
+                  <button class="swatch" type="button" data-value="#6B7684">
+                    <span class="swatch__color sw-gray-600"></span>
+                    <span class="swatch__meta"><span class="swatch__name">Neutral</span><span class="swatch__value">#6B7684</span><span class="swatch__value">예약 · 기본</span></span>
+                  </button>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card__head"><p class="card__title">색상 사용 규칙</p></div>
+            <div class="card__body">
+              <div class="rule-list">
+                <div class="rule"><span class="rule__key">채움(fill)</span><span class="rule__value">원색 <code class="is-brand">#7EE8C7</code> 만 사용 — 버튼 · 선택된 칩 · 진행바</span></div>
+                <div class="rule"><span class="rule__key">브랜드 텍스트</span><span class="rule__value">흰 배경 위에서는 <code>#0E9A73</code>(Brand 600)</span></div>
+                <div class="rule"><span class="rule__key">민트 위 글자</span><span class="rule__value">항상 <code>#111111</code>(Ink) — 흰색 글자 금지</span></div>
+                <div class="rule"><span class="rule__key">서브 컬러</span><span class="rule__value">시리즈 라벨에만 — 버튼 · 상태 · 강조 배경에 쓰지 않습니다</span></div>
+                <div class="rule"><span class="rule__key">상태 컬러</span><span class="rule__value">성공 · 주의 · 오류 · 중립 4단계 외에 새로운 색을 추가하지 않습니다</span></div>
+                <div class="rule"><span class="rule__key">강조 개수</span><span class="rule__value">한 화면에 브랜드 강조는 최대 두 곳까지</span></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== 타이포그래피 ==================== -->
+        <section class="section" id="type">
+          <div class="section__head">
+            <p class="eyebrow">파운데이션</p>
+            <h2 class="section__title">타이포그래피</h2>
+            <p class="section__desc">
+              서체는 <strong>SUIT</strong> 하나로 통일합니다. 숫자 · 시간도 같은 서체를 쓰되 자릿수 폭만 고정합니다.
+              크기는 <strong>7단계</strong>로 고정하고 최소 14px, 본문은 16px을 지킵니다.
+            </p>
+          </div>
+
+          <div class="card">
+            <div class="card__head"><p class="card__title">타입 스케일</p></div>
+            <div class="table-wrap">
+              <table class="table table--doc">
+                <thead><tr><th class="col-role">역할</th><th>미리보기</th><th class="col-spec">스펙</th></tr></thead>
+                <tbody>
+                  <tr><td><p class="table__role">Display · 대제목</p></td><td><span class="table__sample t-display">오리지널 콘텐츠</span></td><td><p class="table__spec">700 · 40px / 1.3</p><p class="table__spec-sub">--font-size-display</p></td></tr>
+                  <tr><td><p class="table__role">Title · 섹션 제목</p></td><td><span class="table__sample t-title">브리프 콘텐츠</span></td><td><p class="table__spec">700 · 28px / 1.35</p><p class="table__spec-sub">--font-size-title</p></td></tr>
+                  <tr><td><p class="table__role">Heading · 중제목</p></td><td><span class="table__sample t-heading">최근 콘텐츠</span></td><td><p class="table__spec">700 · 21px / 1.4</p><p class="table__spec-sub">--font-size-heading</p></td></tr>
+                  <tr><td><p class="table__role">Subhead · 카드 타이틀</p></td><td><span class="table__sample t-subhead">제634회 | 초격차 경영</span></td><td><p class="table__spec">600 · 18px / 1.4</p><p class="table__spec-sub">--font-size-subhead</p></td></tr>
+                  <tr><td><p class="table__role">Body · 본문</p></td><td><span class="table__sample t-body">추론 비용의 하락은 곧 의사결정 비용의 하락입니다.</span></td><td><p class="table__spec">400 · 16px / 1.7</p><p class="table__spec-sub">--font-size-body</p></td></tr>
+                  <tr><td><p class="table__role">Body Strong · 리스트</p></td><td><span class="table__sample t-body-strong">AI와 추론의 경제학</span></td><td><p class="table__spec">600 · 16px / 1.5</p><p class="table__spec-sub">--font-size-body</p></td></tr>
+                  <tr><td><p class="table__role">Small · 보조 본문</p></td><td><span class="table__sample t-sm">하루 한 잔처럼 짧게 마시는 인사이트</span></td><td><p class="table__spec">400 · 15px / 1.6</p><p class="table__spec-sub">--font-size-sm</p></td></tr>
+                  <tr><td><p class="table__role">Caption · 캡션</p></td><td><span class="table__sample t-caption">2026. 7. 10 (금) 오전 7:00</span></td><td><p class="table__spec">500 · 14px / 1.5</p><p class="table__spec-sub">--font-size-caption</p></td></tr>
+                  <tr><td><p class="table__role">Label · 강조 라벨</p></td><td><span class="table__sample t-label">LIVE 예정</span></td><td><p class="table__spec">700 · 14px / 1.5</p><p class="table__spec-sub">--font-size-caption · brand</p></td></tr>
+                  <tr><td><p class="table__role">Tag · 태그 · 배지</p></td><td><span class="table__sample"><span class="tag tag--hash tag--success">#경영전략</span></span></td><td><p class="table__spec">600 · 13px / 1.4</p><p class="table__spec-sub">--font-size-tag</p></td></tr>
+                  <tr><td><p class="table__role">Numeric · 숫자 · 시간</p></td><td><span class="table__sample t-num">42:10 / D-1</span></td><td><p class="table__spec">600 · 14px / 1.5</p><p class="table__spec-sub">tabular-nums</p></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card__head">
+              <p class="card__title">개선안 원본과의 크기 대조</p>
+              <span class="card__hint">출처 · 브리프 / 오리지널 / 라이브 개선안</span>
+            </div>
+            <div class="table-wrap">
+              <table class="table table--doc">
+                <thead><tr><th class="col-role">역할</th><th>개선안 원본</th><th class="col-spec">디자인 시스템</th></tr></thead>
+                <tbody>
+                  <tr><td><p class="table__role">페이지 제목</p></td><td><span class="table__spec">700 · 26px</span><p class="table__sub">h2 시리즈 페이지 헤더</p></td><td><p class="table__spec">700 · 28px</p><p class="table__spec-sub">1.08배</p></td></tr>
+                  <tr><td><p class="table__role">섹션 제목</p></td><td><span class="table__spec">700 · 18~20px</span><p class="table__sub">h3 레일 헤더</p></td><td><p class="table__spec">700 · 21px</p><p class="table__spec-sub">1.05~1.17배</p></td></tr>
+                  <tr><td><p class="table__role">카드 제목 (대)</p></td><td><span class="table__spec">700 · 17~19px</span><p class="table__sub">대표 카드 · 피처</p></td><td><p class="table__spec">600 · 18px</p><p class="table__spec-sub">1.00배</p></td></tr>
+                  <tr><td><p class="table__role">카드 제목 (중)</p></td><td><span class="table__spec">600 · 14.5px</span><p class="table__sub">목록 카드</p></td><td><p class="table__spec">600 · 16px</p><p class="table__spec-sub">1.10배</p></td></tr>
+                  <tr><td><p class="table__role">본문</p></td><td><span class="table__spec">400 · 15px / 1.75</span><p class="table__sub">피처 설명문</p></td><td><p class="table__spec">400 · 16px / 1.7</p><p class="table__spec-sub">1.07배</p></td></tr>
+                  <tr><td><p class="table__role">보조 본문</p></td><td><span class="table__spec">400 · 13.5px / 1.6</span><p class="table__sub">페이지 설명</p></td><td><p class="table__spec">400 · 15px / 1.6</p><p class="table__spec-sub">1.11배</p></td></tr>
+                  <tr><td><p class="table__role">캡션 · 메타</p></td><td><span class="table__spec">400 · 11~12.5px</span><p class="table__sub">날짜 · 연사 · 건수</p></td><td><p class="table__spec">500 · 14px</p><p class="table__spec-sub">1.12~1.27배 — 하한 적용</p></td></tr>
+                  <tr><td><p class="table__role">시리즈 라벨</p></td><td><span class="table__spec">600 · 11~12.5px</span><p class="table__sub">카드 상단 컬러 텍스트</p></td><td><p class="table__spec">600 · 13px</p><p class="table__spec-sub">원본 10.5~11px · 하한 적용</p></td></tr>
+                  <tr><td><p class="table__role">태그 · 배지</p></td><td><span class="table__spec">500 · 10.5~11px</span><p class="table__sub">해시태그 · 난이도 · 상태</p></td><td><p class="table__spec">600 · 13px</p><p class="table__spec-sub">원본 10~10.5px · 하한 적용</p></td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="card__body">
+              <div class="rule-list">
+                <div class="rule">
+                  <span class="rule__key">제목 · 본문</span>
+                  <span class="rule__value">원본 대비 1.0~1.1배 — 이미 같은 체계입니다. 그대로 둡니다</span>
+                </div>
+                <div class="rule">
+                  <span class="rule__key">태그 · 배지</span>
+                  <span class="rule__value">읽는 글이 아니라 표식이므로 <code>13px</code>까지 내립니다. 원본 11px은 화면에서 놓치기 쉬워 따라가지 않습니다</span>
+                </div>
+                <div class="rule">
+                  <span class="rule__key">캡션 · 라벨</span>
+                  <span class="rule__value">읽어야 하는 정보라 <code>14px</code>을 하한으로 지킵니다. 크기 대신 굵기와 색으로 위계를 만듭니다</span>
+                </div>
+                <div class="rule">
+                  <span class="rule__key">굵기</span>
+                  <span class="rule__value">원본의 500·600·700 세 단계를 그대로 따릅니다. 태그는 700에서 600으로 낮췄습니다</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== 버튼 ==================== -->
+        <section class="section" id="button">
+          <div class="section__head">
+            <p class="eyebrow">기본 (범용)</p>
+            <h2 class="section__title">버튼</h2>
+          </div>
+          <div class="card">
+            <div class="card__head">
+              <span class="live"><span class="live__dot"></span>LIVE PREVIEW</span>
+              <span class="card__hint">출처 · DO+ / 라이브 / 마이스튜디오 개선안</span>
+            </div>
+            <div class="preview">
+              <div class="grid grid--demo">
+                <div class="demo"><p class="preview__label">Primary</p><button class="btn btn--primary" type="button" data-toast="시청하기">시청하기 <span class="icon icon--sm icon--after">chevron_right</span></button></div>
+                <div class="demo"><p class="preview__label">Outline</p><button class="btn btn--outline" type="button" data-toast="더보기">더보기 <span class="icon icon--sm">add</span></button></div>
+                <div class="demo"><p class="preview__label">Text</p><button class="btn btn--text" type="button" data-toast="전체보기">전체보기 <span class="icon icon--sm icon--after">chevron_right</span></button></div>
+                <div class="demo"><p class="preview__label">Block</p><button class="btn btn--primary btn--block" type="button" data-toast="수강신청">수강신청</button></div>
+                <div class="demo"><p class="preview__label">Outline · Block</p><button class="btn btn--outline btn--block" type="button" data-toast="안내장 다운로드">안내장 다운로드</button></div>
+                <div class="demo"><p class="preview__label">Disabled</p><button class="btn" type="button" disabled>오프라인 신청</button></div>
+              </div>
+              <div class="preview__divider">
+                <p class="preview__label">사이즈</p>
+                <div class="row row--end">
+                  <div class="size-item"><button class="btn btn--primary btn--sm" type="button" data-toast="문의 접수">문의 접수</button><p class="size-item__label">15px</p></div>
+                  <div class="size-item"><button class="btn btn--primary" type="button" data-toast="코스 시작하기">코스 시작하기</button><p class="size-item__label">16px</p></div>
+                  <div class="size-item"><button class="btn btn--primary btn--lg" type="button" data-toast="수강신청">수강신청</button><p class="size-item__label">18px</p></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== 링크 버튼 ==================== -->
+        <section class="section" id="button-link">
+          <div class="section__head">
+            <p class="eyebrow">기본 (범용)</p>
+            <h2 class="section__title">링크 버튼</h2>
+          </div>
+          <div class="card">
+            <div class="card__head">
+              <span class="live"><span class="live__dot"></span>LIVE PREVIEW</span>
+              <span class="card__hint">출처 · 오리지널 / 브리프 / 피드 개선안</span>
+            </div>
+            <div class="preview">
+              <div class="grid grid--demo">
+                <div class="demo"><p class="preview__label">섹션 우측</p><button class="btn btn--text" type="button" data-toast="전체보기">전체보기 <span class="icon icon--sm icon--after">chevron_right</span></button></div>
+                <div class="demo"><p class="preview__label">목록 이동</p><button class="btn btn--text" type="button" data-toast="전체 연사">전체 연사 <span class="icon icon--sm icon--after">chevron_right</span></button></div>
+                <div class="demo"><p class="preview__label">본문 이동</p><button class="btn btn--text" type="button" data-toast="전문보기">전문보기 <span class="icon icon--sm icon--after">chevron_right</span></button></div>
+                <div class="demo"><p class="preview__label">외부 이동</p><button class="btn btn--outline" type="button" data-toast="라이브 바로가기">라이브 바로가기 <span class="icon icon--sm icon--after">chevron_right</span></button></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== 태그 ==================== -->
+        <section class="section" id="tag">
+          <div class="section__head">
+            <p class="eyebrow">기본 (범용)</p>
+            <h2 class="section__title">태그</h2>
+            <p class="section__desc">
+              값에 붙여 <strong>읽는 표식</strong>입니다. 눌러서 목록을 바꾸는 칩 · 탭은
+              <code>.chip</code> · <code>.tabs</code> 쪽에 있습니다. 시리즈명은 태그가 아니라 라벨이라 다음 항목에서 따로 다룹니다.
+            </p>
+          </div>
+          <div class="card">
+            <div class="card__head">
+              <span class="live"><span class="live__dot"></span>LIVE PREVIEW</span>
+              <span class="card__hint">출처 · 에스프레소 / 라이브 / 이러닝 개선안</span>
+            </div>
+            <div class="preview">
+              <div class="preview__group">
+                <p class="preview__label">신규 · 분류 <span>· 콘텐츠 카드 태그 줄</span></p>
+                <div class="tag-row">
+                  <span class="tag tag--new">NEW</span>
+                  <span class="tag tag--neutral">온라인</span>
+                  <span class="tag tag--fill">회원사 무료</span>
+                  <span class="tag tag--neutral">법정의무교육</span>
+                </div>
+              </div>
+              <div class="preview__group">
+                <p class="preview__label">썸네일 위 <span>· 상자 크기와 모서리가 모두 같아야 합니다</span></p>
+                <div class="tag-row">
+                  <span class="tag tag--new">NEW</span>
+                  <span class="tag tag--lv-basic">입문</span>
+                  <span class="tag tag--dark">27:33</span>
+                  <span class="tag tag--dark">10+</span>
+                </div>
+              </div>
+              <div class="preview__group">
+                <p class="preview__label">해시 태그 <span>· 테두리 없는 틴트</span></p>
+                <div class="tag-row">
+                  <span class="tag tag--hash tag--success">#경영전략</span>
+                  <span class="tag tag--hash tag--success">#리더스포럼</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card__head">
+              <p class="card__title">태그 유형</p>
+              <span class="card__hint">상자는 모두 같습니다 · 13px / 600 / padding 4·10 / 모서리 5px — 원본도 알약형은 쓰지 않습니다</span>
+            </div>
+            <div class="table-wrap">
+              <table class="table table--doc">
+                <thead><tr><th class="col-role">유형</th><th>사용 목적 · 적용 위치</th><th class="col-spec">클래스</th></tr></thead>
+                <tbody>
+                  <tr>
+                    <td><p class="table__role">공통 상자</p></td>
+                    <td><span class="table__sample"><span class="tag tag--neutral">태그</span></span><p class="table__sub">유형과 무관하게 크기 · 여백 · 모서리는 하나입니다. <strong>내용 폭만큼만 차지</strong>하므로 세로로 쌓인 영역에 홀로 놓아도 가로로 늘어나지 않습니다</p></td>
+                    <td><p class="table__spec">600 · 13px / 1.4</p><p class="table__spec-sub">p4·10 · r5 · width fit-content</p></td>
+                  </tr>
+                  <tr>
+                    <td><p class="table__role">NEW</p></td>
+                    <td><span class="table__sample"><span class="tag tag--new">NEW</span></span><p class="table__sub">신규 콘텐츠 표시. 이러닝 카드 가격 아래 배지 줄. 채움이 아니라 <strong>틴트 + 테두리</strong>입니다 — 채우면 제목보다 먼저 읽힙니다</p></td>
+                    <td><p class="table__spec">.tag--new</p><p class="table__spec-sub">원본 <code>700 10px · 틴트 12% · 테두리 40%</code></p></td>
+                  </tr>
+                  <tr>
+                    <td><p class="table__role">상태 · 정상</p></td>
+                    <td><span class="table__sample"><span class="tag tag--success">답변 완료</span><span class="tag tag--fill">회원사 무료</span></span><p class="table__sub">완료 · 진행 중 · 혜택. ASK HR · 결제 내역 · 이러닝</p></td>
+                    <td><p class="table__spec">.tag--success</p><p class="table__spec-sub">브랜드 틴트 + 테두리</p></td>
+                  </tr>
+                  <tr>
+                    <td><p class="table__role">상태 · 대기</p></td>
+                    <td><span class="table__sample"><span class="tag tag--pending">답변 대기</span></span><p class="table__sub">대기 · 확인 필요. ASK HR 문의 목록</p></td>
+                    <td><p class="table__spec">.tag--pending</p><p class="table__spec-sub">대기 틴트 + 테두리</p></td>
+                  </tr>
+                  <tr>
+                    <td><p class="table__role">분류 · 중립</p></td>
+                    <td><span class="table__sample"><span class="tag tag--neutral">수강완료</span><span class="tag tag--neutral">직무 과정</span></span><p class="table__sub">과정 속성 · 종료된 상태. 이러닝 카드 · 마이스튜디오</p></td>
+                    <td><p class="table__spec">.tag--neutral</p><p class="table__spec-sub">배경 없음 + 테두리</p></td>
+                  </tr>
+                  <tr>
+                    <td><p class="table__role">난이도</p></td>
+                    <td><span class="table__sample"><span class="tag tag--lv-basic">입문</span><span class="tag tag--lv-inter">중급</span><span class="tag tag--lv-adv">고급</span></span><p class="table__sub">과정 수준. 이러닝 카드 썸네일 좌상단</p></td>
+                    <td><p class="table__spec">.tag--lv-basic / -inter / -adv</p><p class="table__spec-sub">3단계 채움</p></td>
+                  </tr>
+                  <tr>
+                    <td><p class="table__role">미디어 오버레이</p></td>
+                    <td><span class="table__sample"><span class="tag tag--dark">27:33</span><span class="tag tag--dark">10+</span></span><p class="table__sub">재생시간 · 남은 개수. 썸네일 위에만 — 어떤 이미지 위에서도 읽히도록 어둡게</p></td>
+                    <td><p class="table__spec">.tag--dark</p><p class="table__spec-sub">검정 82% 채움</p></td>
+                  </tr>
+                  <tr>
+                    <td><p class="table__role">채움</p></td>
+                    <td><span class="table__sample"><span class="tag tag--fill">D-1</span><span class="tag tag--fill">PDF</span></span><p class="table__sub">D-day · 회원사 무료 · 파일 형식. 원본 <code>#0f0f0f on #7ee8c7</code></p></td>
+                    <td><p class="table__spec">.tag--fill</p><p class="table__spec-sub">브랜드 채움 · tabular-nums</p></td>
+                  </tr>
+                  <tr>
+                    <td><p class="table__role">해시태그</p></td>
+                    <td><span class="table__sample"><span class="tag tag--hash tag--success">#경영전략</span></span><p class="table__sub">강연 키워드. 테두리를 빼 같은 크기라도 가볍게 읽힙니다</p></td>
+                    <td><p class="table__spec">.tag--hash</p><p class="table__spec-sub">테두리 없음 · 굵기 500</p></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== 시리즈 라벨 ==================== -->
+        <section class="section" id="series-label">
+          <div class="section__head">
+            <p class="eyebrow">기본 (범용)</p>
+            <h2 class="section__title">시리즈 라벨</h2>
+            <p class="section__desc">
+              시리즈명은 태그가 아닙니다. 원본 개선안에서 <strong>배경 없는 컬러 텍스트 한 줄</strong>로 쓰이던 표현을 그대로 옮겨
+              <code>.series</code> 라벨로 두었습니다. 상자가 없으므로 태그와 규칙이 다릅니다 — 특히 간격을 스스로 만들지 못합니다.
+            </p>
+          </div>
+
+          <div class="card">
+            <div class="card__head">
+              <span class="live"><span class="live__dot"></span>LIVE PREVIEW</span>
+              <span class="card__hint">출처 · 오리지널 / 라이브 개선안</span>
+            </div>
+            <div class="preview">
+              <div class="preview__group">
+                <p class="preview__label">시리즈 4종 <span>· 전용 색이 없는 시리즈는 브랜드 색</span></p>
+                <div class="tag-row">
+                  <span class="series series--gold">최고경영자조찬회</span>
+                  <span class="series series--orange">리더스포럼</span>
+                  <span class="series series--green">특별한클라스</span>
+                  <span class="series">스킬업클라스</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card__head">
+              <p class="card__title">시리즈 표기 — 원본 표현과의 대응</p>
+              <span class="card__hint">출처 · 최고경영자조찬회 / 오리지널 / 라이브 개선안</span>
+            </div>
+            <div class="table-wrap">
+              <table class="table table--doc">
+                <thead><tr><th class="col-role">원본 위치</th><th>원본 표현</th><th class="col-spec">디자인 시스템</th></tr></thead>
+                <tbody>
+                  <tr>
+                    <td><p class="table__role">카드 시리즈 라벨</p></td>
+                    <td><span class="table__sample series series--gold">최고경영자조찬회</span><p class="table__sub">배경·테두리 없는 컬러 텍스트. 원본 표현을 그대로 컴포넌트로 옮겼습니다</p></td>
+                    <td><p class="table__spec">600 · 13px · #94690F</p><p class="table__spec-sub">.series--gold</p></td>
+                  </tr>
+                  <tr>
+                    <td><p class="table__role">카테고리 필터</p></td>
+                    <td><span class="table__sample"><span class="chip is-active">최고경영자조찬회</span></span><p class="table__sub">채운 알약. 원본은 시리즈 색으로 채웠지만, 서브 컬러로 버튼·칩을 채우지 않는 규칙을 따라 브랜드 민트로 통일했습니다</p></td>
+                    <td><p class="table__spec">700 · 15px · bg 브랜드 민트</p><p class="table__spec-sub">.chip.is-active</p></td>
+                  </tr>
+                  <tr>
+                    <td><p class="table__role">강연 해시태그</p></td>
+                    <td><span class="table__sample"><span class="tag tag--hash tag--success">#경영전략</span></span><p class="table__sub">테두리 없는 틴트 + 컬러 글자. 태그 형태는 해시태그에만 씁니다</p></td>
+                    <td><p class="table__spec">500 · 13px · 틴트 배경</p><p class="table__spec-sub">.tag--hash</p></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card__head">
+              <span class="live"><span class="live__dot"></span>LIVE PREVIEW</span>
+              <span class="card__hint">출처 · 오리지널 개선안 / 인기 콘텐츠</span>
+            </div>
+            <div class="preview">
+              <div class="preview__group">
+                <p class="preview__label">인기 콘텐츠 <span>· 여러 시리즈가 섞이는 목록 — 라벨이 가장 크게 일하는 자리</span></p>
+                <div class="grid grid--demo">
+                  <div class="vcard">
+                    <div class="thumb thumb--wide"><span class="tag tag--dark thumb__br">42:10</span></div>
+                    <p class="series series--orange">리더스포럼</p>
+                    <p class="t-body-strong">제216회 | 트레바리: 결핍과 비즈니스를 잇다</p>
+                    <div class="vcard__speaker"><span class="avatar avatar--xs"></span><span class="vcard__name">윤수영 트레바리 대표</span></div>
+                  </div>
+                  <div class="vcard">
+                    <div class="thumb thumb--wide"><span class="tag tag--dark thumb__br">25:07</span></div>
+                    <p class="series series--green">특별한클라스</p>
+                    <p class="t-body-strong">Ep.1 연애를 망설이는 시대</p>
+                    <div class="vcard__speaker"><span class="avatar avatar--xs"></span><span class="vcard__name">허규형 정신건강의학과 의사</span></div>
+                  </div>
+                  <div class="vcard">
+                    <div class="thumb thumb--wide"><span class="tag tag--dark thumb__br">52:40</span></div>
+                    <p class="series series--gold">최고경영자조찬회</p>
+                    <p class="t-body-strong">제634회 | 초격차 경영</p>
+                    <div class="vcard__speaker"><span class="avatar avatar--xs"></span><span class="vcard__name">권오현 오렌지플래닛 창업재단 이사장</span></div>
+                  </div>
+                </div>
+              </div>
+              <div class="preview__divider">
+                <p class="preview__label">세로 리듬 <span>· 라벨이 제목에 붙어 한 덩어리로 읽힙니다</span></p>
+                <div class="rule-list">
+                  <div class="rule">
+                    <span class="rule__key">썸네일 ↔ 라벨</span>
+                    <span class="rule__value"><strong>12px</strong> <code>--space-media-text</code> — 이미지에서 텍스트로 층이 바뀌는 자리라 가장 넓게</span>
+                  </div>
+                  <div class="rule">
+                    <span class="rule__key">라벨 ↔ 제목</span>
+                    <span class="rule__value"><strong>4px</strong> <code>--space-label-title</code> — 가장 좁게. 벌어지는 순간 라벨이 떠 보입니다</span>
+                  </div>
+                  <div class="rule">
+                    <span class="rule__key">제목 ↔ 연사</span>
+                    <span class="rule__value"><strong>8px</strong> <code>--space-title-meta</code></span>
+                  </div>
+                  <div class="rule">
+                    <span class="rule__key">메타 ↔ 버튼</span>
+                    <span class="rule__value"><strong>12px</strong> <code>--space-meta-action</code></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card__head">
+              <span class="live"><span class="live__dot"></span>LIVE PREVIEW</span>
+              <span class="card__hint">출처 · 최고경영자조찬회 개선안 화면 순서 그대로</span>
+            </div>
+            <div class="preview">
+
+              <div class="preview__group">
+                <p class="preview__label">① 카테고리 필터 <span>· 채움 필 · 현재 시리즈만 활성</span></p>
+                <div class="chip-row" data-chip-group="series-page">
+                  <button class="chip is-active" type="button">최고경영자조찬회</button>
+                  <button class="chip" type="button">리더스포럼</button>
+                  <button class="chip" type="button">특별한클라스</button>
+                  <button class="chip" type="button">스킬업클라스</button>
+                </div>
+              </div>
+
+              <div class="preview__group">
+                <p class="preview__label">② 페이지 헤더</p>
+                <div class="flow flow--xs">
+                  <p class="t-heading">최고경영자조찬회</p>
+                  <p class="t-sm">국내 최장수 CEO 조찬 강연 — 매월 각계 리더가 전하는 경영 통찰을 만나보세요.</p>
+                </div>
+              </div>
+
+              <div class="preview__divider">
+                <p class="preview__label">③ 이달의 세미나 <span>· 대표 카드에는 시리즈 라벨을 답니다</span></p>
+                <div class="grid grid--demo">
+                  <div class="vcard">
+                    <div class="thumb thumb--wide"><span class="tag tag--dark thumb__br">52:40</span></div>
+                    <p class="series series--gold">최고경영자조찬회</p>
+                    <p class="t-subhead">제634회 | 초격차 경영</p>
+                    <div class="vcard__speaker"><span class="avatar avatar--sm"></span><span class="vcard__name">권오현 오렌지플래닛 창업재단 이사장</span></div>
+                    <button class="btn btn--primary btn--sm" type="button" data-toast="시청하기">시청하기 <span class="icon icon--sm icon--after">chevron_right</span></button>
+                  </div>
+                  <div class="vcard">
+                    <div class="thumb thumb--wide"><span class="tag tag--dark thumb__br">55:03</span></div>
+                    <p class="series series--gold">최고경영자조찬회</p>
+                    <p class="t-subhead">제633회 | 제56회 한국의 경영자상 특별대담</p>
+                    <div class="vcard__speaker"><span class="avatar avatar--sm"></span><span class="vcard__name">곽재선 KG그룹 회장</span></div>
+                    <button class="btn btn--primary btn--sm" type="button" data-toast="시청하기">시청하기 <span class="icon icon--sm icon--after">chevron_right</span></button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="preview__divider">
+                <p class="preview__label">④ 전체 세미나 <span>· 한 시리즈만 모인 목록이라 라벨을 생략합니다</span></p>
+                <div class="grid grid--demo">
+                  <div class="vcard">
+                    <div class="thumb thumb--wide"><span class="tag tag--dark thumb__br">46:11</span></div>
+                    <p class="t-body-strong">제628회 | 글로벌 AI 전력 수요 전망 및 대책</p>
+                    <div class="vcard__speaker"><span class="avatar avatar--xs"></span><span class="vcard__name">우태희 효성중공업 대표이사</span></div>
+                  </div>
+                  <div class="vcard">
+                    <div class="thumb thumb--wide"><span class="tag tag--dark thumb__br">51:20</span></div>
+                    <p class="t-body-strong">제616회 | 모든 경영자는 경험자다: 경영자가 바꾸는 고객경험</p>
+                    <div class="vcard__speaker"><span class="avatar avatar--xs"></span><span class="vcard__name">차경진 한양대학교 교수</span></div>
+                  </div>
+                  <div class="vcard">
+                    <div class="thumb thumb--wide"><span class="tag tag--dark thumb__br">48:33</span></div>
+                    <p class="t-body-strong">제610회 | 불황을 이기는 브랜드의 조건</p>
+                    <div class="vcard__speaker"><span class="avatar avatar--xs"></span><span class="vcard__name">이찬 서울대학교 교수</span></div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="preview__divider">
+                <p class="preview__label">⑤ 상세 화면 메타 <span>· 제목 바로 위에 시리즈 라벨</span></p>
+                <div class="flow flow--sm">
+                  <div class="row">
+                    <span class="series series--gold">최고경영자조찬회</span>
+                    <span class="t-num">52:40</span>
+                  </div>
+                  <p class="t-heading">제634회 | 초격차 경영</p>
+                  <div class="vcard__speaker">
+                    <span class="avatar avatar--md"></span>
+                    <span class="vcard__name">권오현 오렌지플래닛 창업재단 이사장</span>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card__head"><p class="card__title">시리즈 라벨 사용 규칙</p></div>
+            <div class="card__body">
+              <div class="rule-list">
+                <div class="rule">
+                  <span class="rule__key">형태</span>
+                  <span class="rule__value"><strong>태그가 아니라 텍스트 라벨입니다.</strong> 배경·테두리·padding 없이 색과 굵기로만 구분합니다 — 원본 개선안의 표현 그대로</span>
+                </div>
+                <div class="rule">
+                  <span class="rule__key">붙이는 곳</span>
+                  <span class="rule__value">여러 시리즈가 섞이는 목록 — 오리지널 인기 콘텐츠 · 홈 · 검색 결과 · 라이브러리</span>
+                </div>
+                <div class="rule">
+                  <span class="rule__key">생략하는 곳</span>
+                  <span class="rule__value">한 시리즈만 모인 목록 — 시리즈 레일과 상세 페이지의 전체 목록에서는 중복이라 뺍니다</span>
+                </div>
+                <div class="rule">
+                  <span class="rule__key">위치</span>
+                  <span class="rule__value">썸네일 <strong>아래</strong>, 제목 <strong>바로 위</strong>. 썸네일 안에는 재생시간·D-day만 얹습니다</span>
+                </div>
+                <div class="rule">
+                  <span class="rule__key">간격 · 카드</span>
+                  <span class="rule__value">썸네일 <strong>12px</strong> 라벨 <strong>4px</strong> 제목 <strong>8px</strong> 메타. 라벨↔제목이 카드에서 가장 좁은 간격이어야 한 덩어리로 읽힙니다</span>
+                </div>
+                <div class="rule">
+                  <span class="rule__key">간격 · 설명 옆</span>
+                  <span class="rule__value">문서·표처럼 라벨 아래에 <strong>설명</strong>이 오는 자리는 <strong>8px</strong> <code>--space-title-meta</code>. 카드와 달리 라벨과 설명은 서로 다른 층이라 붙이면 겹쳐 보입니다. 라벨은 배경이 없어 스스로 여백을 만들지 못하므로 <strong>여백은 라벨이 아니라 담는 칸이 책임집니다</strong></span>
+                </div>
+                <div class="rule">
+                  <span class="rule__key">컬러</span>
+                  <span class="rule__value">조찬회 <code>#94690F</code> · 리더스포럼 <code>#C4520F</code> · 특별한클라스 <code>#1B8038</code> · 그 외 <code>#097C59</code>. 원색(<code>#C28E39</code> 등)은 칩을 채울 때 쓰고, 라벨은 흰 배경 4.5:1을 넘기려 어둡게 조정한 값을 씁니다</span>
+                </div>
+                <div class="rule">
+                  <span class="rule__key">필터와의 구분</span>
+                  <span class="rule__value">같은 이름이라도 <strong>누르는 자리</strong>(카테고리 필터)는 채움 칩 <code>.chip.is-active</code>, <strong>읽는 자리</strong>(카드·상세)는 라벨 <code>.series</code></span>
+                </div>
+                <div class="rule">
+                  <span class="rule__key">개수</span>
+                  <span class="rule__value">카드 한 장에 시리즈 라벨은 하나만</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== 툴팁 ==================== -->
+        <section class="section" id="tooltip">
+          <div class="section__head">
+            <p class="eyebrow">기본 (범용)</p>
+            <h2 class="section__title">툴팁</h2>
+          </div>
+          <div class="card">
+            <div class="card__head">
+              <span class="live"><span class="live__dot"></span>LIVE PREVIEW</span>
+              <span class="card__hint">출처 · 피드상세 / 브리프 개선안</span>
+            </div>
+            <div class="preview">
+              <div class="preview__group">
+                <p class="preview__label">섹션 헤더 물음표</p>
+                <div class="tip">
+                  <span class="list-head__title">deeep</span>
+                  <span class="tip__mark"><span class="icon icon--sm">help</span></span>
+                  <span class="tip__bubble">한 주제를 깊게 파고드는 롱폼 다큐멘터리</span>
+                </div>
+              </div>
+              <div class="preview__group">
+                <p class="preview__label">시리즈 설명</p>
+                <div class="tip">
+                  <span class="list-head__title">0to1</span>
+                  <span class="tip__mark"><span class="icon icon--sm">help</span></span>
+                  <span class="tip__bubble">한 편의 핵심을 1분 컷 지식 클립</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== 날짜 텍스트 ==================== -->
+        <section class="section" id="date-text">
+          <div class="section__head">
+            <p class="eyebrow">기본 (범용)</p>
+            <h2 class="section__title">날짜 텍스트</h2>
+          </div>
+          <div class="card">
+            <div class="card__head">
+              <span class="live"><span class="live__dot"></span>LIVE PREVIEW</span>
+              <span class="card__hint">출처 · 브리프 / ASK HR / 라이브 개선안</span>
+            </div>
+            <div class="preview">
+              <div class="grid grid--demo">
+                <div class="demo"><p class="preview__label">카드 하단</p><span class="t-num">2026-07-08</span></div>
+                <div class="demo"><p class="preview__label">상세 메타</p><span class="t-num">2026.07.07 · 18:32</span></div>
+                <div class="demo"><p class="preview__label">최근 항목</p><span class="t-num">26/07/14</span></div>
+                <div class="demo"><p class="preview__label">라이브 일시</p><span class="t-num">2026. 7. 10 (금) 오전 7:00</span></div>
+                <div class="demo"><p class="preview__label">결제 내역</p><span class="t-num">26.06.02</span></div>
+                <div class="demo"><p class="preview__label">발급일</p><span class="t-num">2026.06.30</span></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== 이미지 · 링크 ==================== -->
+        <section class="section" id="next-image">
+          <div class="section__head">
+            <p class="eyebrow">기본 (범용)</p>
+            <h2 class="section__title">이미지 · 링크</h2>
+          </div>
+          <div class="placeholder placeholder--doc">
+            <p class="placeholder__title">아직 표시할 내용이 없습니다.</p>
+          </div>
+        </section>
+
+        <!-- ==================== 스위치 ==================== -->
+        <section class="section" id="switch">
+          <div class="section__head">
+            <p class="eyebrow">기본 (범용)</p>
+            <h2 class="section__title">스위치</h2>
+          </div>
+          <div class="card">
+            <div class="card__head">
+              <span class="live"><span class="live__dot"></span>LIVE PREVIEW</span>
+              <span class="card__hint">출처 · 마이스튜디오 설정 개선안</span>
+            </div>
+            <div class="preview">
+              <div class="preview__group">
+                <p class="preview__label">알림 설정</p>
+                <div class="switch-row">
+                  <div class="flow flow--xs"><p class="t-body-strong">이수 기한 임박</p><p class="t-caption">법정의무교육·수강 기한 D-7, D-1 알림</p></div>
+                  <span class="switch is-on"><span class="switch__knob"></span></span>
+                </div>
+                <div class="switch-row">
+                  <div class="flow flow--xs"><p class="t-body-strong">뉴스레터 이메일 발송</p><p class="t-caption">큐레이션 콘텐츠·소식을 이메일로 받기</p></div>
+                  <span class="switch is-on"><span class="switch__knob"></span></span>
+                </div>
+                <div class="switch-row">
+                  <div class="flow flow--xs"><p class="t-body-strong">혜택·마케팅 정보</p><p class="t-caption">할인, 신규 과정 프로모션 소식</p></div>
+                  <span class="switch"><span class="switch__knob"></span></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== 입력 필드 ==================== -->
+        <section class="section" id="input-field">
+          <div class="section__head">
+            <p class="eyebrow">폼 · 입력</p>
+            <h2 class="section__title">입력 필드</h2>
+          </div>
+          <div class="card">
+            <div class="card__head">
+              <span class="live"><span class="live__dot"></span>LIVE PREVIEW</span>
+              <span class="card__hint">출처 · 마이스튜디오 설정 개선안</span>
+            </div>
+            <div class="preview">
+              <div class="grid grid--half">
+                <div class="field">
+                  <label class="field__label" for="f-title">제목 <span class="field__req">*</span></label>
+                  <input class="field__input" id="f-title" type="text" placeholder="문의 제목을 입력해주세요" />
+                </div>
+                <div class="field">
+                  <label class="field__label" for="f-body">내용 <span class="field__req">*</span></label>
+                  <textarea class="field__area" id="f-body" placeholder="과정명과 함께 문의 내용을 적어주세요. 결제·환불 문의는 결제일을 함께 남겨주시면 빨라요."></textarea>
+                </div>
+              </div>
+              <div class="preview__divider">
+                <p class="preview__label">첨부파일</p>
+                <div class="field">
+                  <span class="field__file"><span class="icon icon--sm">attach_file</span>파일을 끌어다 놓거나 클릭해 첨부 (개당 5MB)</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== 라벨 ==================== -->
+        <section class="section" id="label">
+          <div class="section__head">
+            <p class="eyebrow">폼 · 입력</p>
+            <h2 class="section__title">라벨</h2>
+          </div>
+          <div class="card">
+            <div class="card__head">
+              <span class="live"><span class="live__dot"></span>LIVE PREVIEW</span>
+              <span class="card__hint">출처 · 마이스튜디오 설정 개선안</span>
+            </div>
+            <div class="preview">
+              <div class="grid grid--demo">
+                <div class="demo"><p class="preview__label">필수</p><span class="field__label">문의 유형 <span class="field__req">*</span></span></div>
+                <div class="demo"><p class="preview__label">필수</p><span class="field__label">제목 <span class="field__req">*</span></span></div>
+                <div class="demo"><p class="preview__label">선택</p><span class="field__label">첨부파일</span></div>
+                <div class="demo"><p class="preview__label">정보 라벨</p><span class="field__label">이메일 (로그인 계정)</span></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== 드롭다운 ==================== -->
+        <section class="section" id="dropdown">
+          <div class="section__head">
+            <p class="eyebrow">폼 · 입력</p>
+            <h2 class="section__title">드롭다운</h2>
+          </div>
+          <div class="card">
+            <div class="card__head">
+              <span class="live"><span class="live__dot"></span>LIVE PREVIEW</span>
+              <span class="card__hint">출처 · 마이스튜디오 설정 개선안</span>
+            </div>
+            <div class="preview">
+              <div class="preview__group">
+                <p class="preview__label">문의 유형</p>
+                <span class="select is-open" data-select><span class="select__value">멤버십 가입/갱신/탈퇴</span><span class="icon icon--sm select__caret">expand_more</span></span>
+                <div class="select-list">
+                  <p class="select-list__item is-active">멤버십 가입/갱신/탈퇴</p>
+                  <p class="select-list__item">교육담당자/기업정보 문의</p>
+                  <p class="select-list__item">이러닝 수강</p>
+                  <p class="select-list__item">개인정보 문의</p>
+                  <p class="select-list__item">시스템 사용 및 오류</p>
+                  <p class="select-list__item">결제/환불 문의</p>
+                  <p class="select-list__item">사업제안/제휴</p>
+                  <p class="select-list__item">도입문의</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== 별점 ==================== -->
+        <section class="section" id="star-rating">
+          <div class="section__head">
+            <p class="eyebrow">피드백 · 표시</p>
+            <h2 class="section__title">별점</h2>
+          </div>
+          <div class="card">
+            <div class="card__head">
+              <span class="live"><span class="live__dot"></span>LIVE PREVIEW</span>
+              <span class="card__hint">출처 · 영상 상세 / 라이브러리 / 이러닝 상세 개선안</span>
+            </div>
+            <div class="preview">
+              <div class="grid grid--demo">
+                <div class="demo"><p class="preview__label">표시 · 5점</p><span class="stars">★★★★★</span></div>
+                <div class="demo"><p class="preview__label">표시 · 4점</p><span class="stars">★★★★<span class="is-off">★</span></span></div>
+                <div class="demo"><p class="preview__label">입력 <span>· 클릭</span></p><span class="stars stars--lg stars--input" data-stars><span class="stars__star" data-star="1">★</span><span class="stars__star" data-star="2">★</span><span class="stars__star" data-star="3">★</span><span class="stars__star" data-star="4">★</span><span class="stars__star is-off" data-star="5">★</span></span></div>
+                <div class="demo"><p class="preview__label">평균</p><p class="t-body-strong">★ 4.7 <span class="t-caption">312개</span></p></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== 진행바 ==================== -->
+        <section class="section" id="progress">
+          <div class="section__head">
+            <p class="eyebrow">피드백 · 표시</p>
+            <h2 class="section__title">진행바</h2>
+          </div>
+          <div class="grid grid--spec">
+            <div class="spec"><p class="spec__label">TRACK</p><p class="spec__value">--track · #E5E8EB</p></div>
+            <div class="spec"><p class="spec__label">HEIGHT</p><p class="spec__value">6px · 10px</p></div>
+            <div class="spec"><p class="spec__label">MOTION</p><p class="spec__value">1000ms ease-out</p></div>
+          </div>
+          <div class="card">
+            <div class="card__head">
+              <span class="live"><span class="live__dot"></span>LIVE PREVIEW</span>
+              <span class="card__hint card__hint--value" id="progValue">70%</span>
+            </div>
+            <div class="preview">
+              <div class="progress-ctl">
+                <button class="chip" type="button" data-prog="0">0%</button>
+                <button class="chip" type="button" data-prog="50">50%</button>
+                <button class="chip is-active" type="button" data-prog="70">70%</button>
+                <button class="chip" type="button" data-prog="100">100%</button>
+                <button class="chip is-replay" type="button" id="progReplay">0 → 70% 다시 보기</button>
+              </div>
+              <div class="grid grid--half">
+                <div class="preview__group">
+                  <div class="progress-head">
+                    <p class="preview__label">플레이어 재생바 <span>· 6px</span></p>
+                    <span class="progress-head__value"><span data-prog-time>00:00</span> / 25:07</span>
+                  </div>
+                  <div class="progress progress--sm"><div class="progress__bar" data-bar></div></div>
+                </div>
+                <div class="preview__group">
+                  <div class="progress-head">
+                    <p class="preview__label">강의 이수율 <span>· 10px</span></p>
+                    <span class="progress-head__value">14강 중 <span data-prog-lesson>0</span>강</span>
+                  </div>
+                  <div class="progress progress--lg"><div class="progress__bar" data-bar></div></div>
+                </div>
+              </div>
+              <div class="preview__divider">
+                <p class="preview__label">마이스튜디오 수강 중인 과정</p>
+                <div class="course-card">
+                  <div class="course-card__meta"><span class="is-brand">AI/디지털</span><span>·</span><span>2개 남음</span></div>
+                  <p class="t-subhead">인공지능(AI) 프로젝트 제대로 배우기 (모델링)</p>
+                  <div class="progress progress--lg"><div class="progress__bar" data-bar></div></div>
+                  <p class="course-card__pct"><span data-prog-pct>0</span>% 수강</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== 빈 목록 ==================== -->
+        <section class="section" id="not-found">
+          <div class="section__head">
+            <p class="eyebrow">피드백 · 표시</p>
+            <h2 class="section__title">빈 목록</h2>
+          </div>
+          <div class="card">
+            <div class="card__head">
+              <span class="live"><span class="live__dot"></span>LIVE PREVIEW</span>
+              <span class="card__hint">출처 · ASK HR / 라이브러리 / 마이스튜디오 개선안</span>
+            </div>
+            <div class="preview">
+              <div class="grid grid--half">
+                <div class="preview__group">
+                  <p class="preview__label">ASK HR 최근 항목</p>
+                  <div class="placeholder"><span class="icon icon--lg placeholder__icon">inbox</span><p class="placeholder__desc">더 이상 최근 항목이 없습니다</p></div>
+                </div>
+                <div class="preview__group">
+                  <p class="preview__label">마이스튜디오 주간 달력</p>
+                  <div class="placeholder"><span class="icon icon--lg placeholder__icon">event_busy</span><p class="placeholder__desc">예정된 일정이 없습니다</p></div>
+                </div>
+              </div>
+              <div class="preview__divider">
+                <p class="preview__label">라이브러리 찜 목록 <span>· 카드 격자의 빈 자리 — 카드와 같은 비율을 유지합니다</span></p>
+                <div class="grid grid--demo">
+                  <div class="placeholder placeholder--slot">
+                    <p class="placeholder__title">마음에 드는 콘텐츠를 찜해 보세요</p>
+                    <p class="placeholder__desc">카드의 ♥를 누르면 여기에 모입니다</p>
+                    <button class="btn btn--text" type="button" data-toast="인기 콘텐츠 둘러보기">인기 콘텐츠 둘러보기 <span class="icon icon--sm icon--after">chevron_right</span></button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== 알림창 ==================== -->
+        <section class="section" id="alert">
+          <div class="section__head">
+            <p class="eyebrow">피드백 · 표시</p>
+            <h2 class="section__title">알림창</h2>
+          </div>
+          <div class="placeholder placeholder--doc">
+            <p class="placeholder__title">아직 표시할 내용이 없습니다.</p>
+          </div>
+        </section>
+
+        <!-- ==================== 빈 상태 ==================== -->
+        <section class="section" id="empty-state">
+          <div class="section__head">
+            <p class="eyebrow">피드백 · 표시</p>
+            <h2 class="section__title">빈 상태</h2>
+          </div>
+          <div class="card">
+            <div class="card__head">
+              <span class="live"><span class="live__dot"></span>LIVE PREVIEW</span>
+              <span class="card__hint">출처 · 영상 상세 개선안</span>
+            </div>
+            <div class="preview">
+              <div class="preview__group">
+                <p class="preview__label">노트 탭 · 첫 작성 유도</p>
+                <div class="placeholder">
+                  <span class="icon icon--lg placeholder__icon">stylus_note</span>
+                  <p class="placeholder__title">이 영상의 첫 노트를 남겨보세요</p>
+                  <p class="placeholder__desc">재생 중 <strong>N 키</strong>를 누르면 현재 시점이 함께 저장돼요.<br />노트는 라이브러리 · 노트 탭에 모입니다.</p>
+                  <button class="btn btn--primary btn--sm" type="button" data-toast="현재 시점에 노트 쓰기">현재 시점에 노트 쓰기</button>
+                </div>
+              </div>
+              <div class="preview__group">
+                <p class="preview__label">강의자료 탭 <span>· 안내만 필요한 자리는 아이콘 + 한 줄</span></p>
+                <div class="placeholder"><span class="icon icon--lg placeholder__icon">description</span><p class="placeholder__desc">자료는 회원사 임직원만 다운로드할 수 있어요.</p></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card__head">
+              <p class="card__title">빈 상태 규격 — 원본 대응</p>
+              <span class="card__hint">출처 · 영상 상세 / 라이브러리 개선안</span>
+            </div>
+            <div class="table-wrap">
+              <table class="table table--doc">
+                <thead><tr><th class="col-role">항목</th><th>원본 값</th><th class="col-spec">디자인 시스템</th></tr></thead>
+                <tbody>
+                  <tr>
+                    <td><p class="table__role">레이아웃</p></td>
+                    <td><span class="table__spec">flex column · align-items:center · justify-content:center</span><p class="table__sub">테두리도 배경도 없습니다 — 패널 안에 조용히 놓입니다</p></td>
+                    <td><p class="table__spec">동일</p><p class="table__spec-sub">.placeholder</p></td>
+                  </tr>
+                  <tr>
+                    <td><p class="table__role">정렬</p></td>
+                    <td><span class="table__spec">text-align: center</span><p class="table__sub">아이콘 · 제목 · 설명 · 버튼이 한 축에 섭니다</p></td>
+                    <td><p class="table__spec">동일</p><p class="table__spec-sub">이전 좌측 정렬에서 수정</p></td>
+                  </tr>
+                  <tr>
+                    <td><p class="table__role">여백</p></td>
+                    <td><span class="table__spec">padding 40px 16px · gap 12px</span></td>
+                    <td><p class="table__spec">48px 16px · gap 12px</p><p class="table__spec-sub">--spacing-xl · --spacing-xs</p></td>
+                  </tr>
+                  <tr>
+                    <td><p class="table__role">아이콘</p></td>
+                    <td><span class="table__sample">✎</span><p class="table__sub">22px 문자 아이콘</p></td>
+                    <td><p class="table__spec">26px</p><p class="table__spec-sub">Material Symbols · --icon-size-lg</p></td>
+                  </tr>
+                  <tr>
+                    <td><p class="table__role">제목</p></td>
+                    <td><span class="table__spec">600 · 13.5px · 흰 80%</span></td>
+                    <td><p class="table__spec">600 · 16px · --text-secondary</p><p class="table__spec-sub">가독성 하한 적용</p></td>
+                  </tr>
+                  <tr>
+                    <td><p class="table__role">설명</p></td>
+                    <td><span class="table__spec">400 · 12px / 1.7 · 흰 45%</span><p class="table__sub">두 문장을 <code>&lt;br&gt;</code> 로 한 덩어리로 묶고, 핵심 키(N 키)만 밝게</p></td>
+                    <td><p class="table__spec">400 · 14px / 1.7 · --text-eyebrow</p><p class="table__spec-sub">strong 은 --text-secondary</p></td>
+                  </tr>
+                  <tr>
+                    <td><p class="table__role">버튼</p></td>
+                    <td><span class="table__spec">600 · 12px · #0f0f0f on #7ee8c7 · r7 · p10·18</span><p class="table__sub">채움 CTA. 빈 화면에서 유일하게 또렷한 요소입니다</p></td>
+                    <td><p class="table__spec">700 · 15px · r8 · p10·16</p><p class="table__spec-sub">.btn--primary.btn--sm</p></td>
+                  </tr>
+                  <tr>
+                    <td><p class="table__role">카드 격자 빈 자리</p></td>
+                    <td><span class="table__spec">1px dashed 흰 15% · r8 · aspect 16/12 · gap 8 · p16</span><p class="table__sub">목록에 섞여 들어가므로 카드 비율을 지킵니다</p></td>
+                    <td><p class="table__spec">동일</p><p class="table__spec-sub">.placeholder--slot</p></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== 상태 뱃지 ==================== -->
+        <section class="section" id="status-badge">
+          <div class="section__head">
+            <p class="eyebrow">피드백 · 표시</p>
+            <h2 class="section__title">상태 뱃지</h2>
+          </div>
+          <div class="card">
+            <div class="card__head">
+              <span class="live"><span class="live__dot"></span>LIVE PREVIEW</span>
+              <span class="card__hint">출처 · 마이스튜디오 설정 / 이러닝 개선안</span>
+            </div>
+            <div class="preview">
+              <div class="preview__group">
+                <p class="preview__label">문의 상태</p>
+                <div class="tag-row">
+                  <span class="tag tag--success">답변 완료</span>
+                  <span class="tag tag--pending">답변 대기</span>
+                </div>
+              </div>
+              <div class="preview__group">
+                <p class="preview__label">결제 상태</p>
+                <div class="tag-row">
+                  <span class="tag tag--success">결제 완료</span>
+                  <span class="tag tag--neutral">환불 완료</span>
+                </div>
+              </div>
+              <div class="preview__group">
+                <p class="preview__label">수강 상태</p>
+                <div class="tag-row">
+                  <span class="tag tag--success">수강중</span>
+                  <span class="tag tag--neutral">수강완료</span>
+                </div>
+              </div>
+              <div class="preview__group">
+                <p class="preview__label">콘텐츠 · 과정</p>
+                <div class="tag-row">
+                  <span class="tag tag--new">NEW</span>
+                  <span class="tag tag--neutral">온라인</span>
+                  <span class="tag tag--neutral">AD</span>
+                  <span class="tag tag--fill">회원사 무료</span>
+                  <span class="tag tag--neutral">법정의무교육</span>
+                  <span class="tag tag--neutral">직무 과정</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== 아바타 ==================== -->
+        <section class="section" id="avatar">
+          <div class="section__head">
+            <p class="eyebrow">피드백 · 표시</p>
+            <h2 class="section__title">아바타</h2>
+          </div>
+          <div class="card">
+            <div class="card__head">
+              <span class="live"><span class="live__dot"></span>LIVE PREVIEW</span>
+              <span class="card__hint">출처 · 개선안 전 화면 공통</span>
+            </div>
+            <div class="preview">
+              <div class="preview__group">
+                <p class="preview__label">사이즈</p>
+                <div class="avatar-row">
+                  <div class="avatar-item"><span class="avatar avatar--xs"></span><span class="avatar-item__label">22px</span></div>
+                  <div class="avatar-item"><span class="avatar avatar--sm"></span><span class="avatar-item__label">26px</span></div>
+                  <div class="avatar-item"><span class="avatar avatar--md"></span><span class="avatar-item__label">34px</span></div>
+                  <div class="avatar-item"><span class="avatar avatar--lg"></span><span class="avatar-item__label">44px</span></div>
+                  <div class="avatar-item"><span class="avatar avatar--xl"></span><span class="avatar-item__label">56px</span></div>
+                  <div class="avatar-item"><span class="avatar avatar--2xl"></span><span class="avatar-item__label">84px</span></div>
+                </div>
+              </div>
+              <div class="preview__divider">
+                <p class="preview__label">연사 표기</p>
+                <div class="vcard__speaker">
+                  <span class="avatar avatar--md"></span>
+                  <div class="flow flow--xs">
+                    <p class="t-body-strong">조여준</p>
+                    <p class="t-caption">더벤처스 CIO</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== 탭 ==================== -->
+        <section class="section" id="tabs">
+          <div class="section__head">
+            <p class="eyebrow">네비게이션</p>
+            <h2 class="section__title">탭</h2>
+          </div>
+          <div class="card">
+            <div class="card__head">
+              <span class="live"><span class="live__dot"></span>LIVE PREVIEW</span>
+              <span class="card__hint">출처 · 라이브러리 / 마이스튜디오 / 이러닝 상세 개선안</span>
+            </div>
+            <div class="preview">
+              <div class="preview__group">
+                <p class="preview__label">라이브러리 <span>· 건수 포함</span></p>
+                <div class="tabs" data-single>
+                  <span class="tabs__item is-active">콘텐츠<span class="tabs__count">6</span></span>
+                  <span class="tabs__item">이러닝<span class="tabs__count">5</span></span>
+                  <span class="tabs__item">노트·요약<span class="tabs__count">3</span></span>
+                  <span class="tabs__item">리뷰<span class="tabs__count">3</span></span>
+                  <span class="tabs__item">강사<span class="tabs__count">4</span></span>
+                </div>
+              </div>
+              <div class="preview__group">
+                <p class="preview__label">마이스튜디오</p>
+                <div class="tabs" data-single>
+                  <span class="tabs__item is-active">대시보드</span>
+                  <span class="tabs__item">수강</span>
+                  <span class="tabs__item">결제</span>
+                  <span class="tabs__item">문의</span>
+                  <span class="tabs__item">자격 인증 관리</span>
+                  <span class="tabs__item">계정 정보</span>
+                </div>
+              </div>
+              <div class="preview__group">
+                <p class="preview__label">이러닝 상세</p>
+                <div class="tabs" data-single>
+                  <span class="tabs__item is-active">커리큘럼</span>
+                  <span class="tabs__item">소개</span>
+                  <span class="tabs__item">강사</span>
+                  <span class="tabs__item">수강평</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== 슬라이드 ==================== -->
+        <section class="section" id="slider">
+          <div class="section__head">
+            <p class="eyebrow">네비게이션</p>
+            <h2 class="section__title">슬라이드</h2>
+          </div>
+          <div class="card">
+            <div class="card__head">
+              <span class="live"><span class="live__dot"></span>LIVE PREVIEW</span>
+              <span class="card__hint">출처 · 이러닝 개선안 (banners)</span>
+            </div>
+            <div class="preview">
+              <div class="banner" data-single>
+                <span class="banner__nav banner__nav--prev is-arrow" data-dir="prev"><span class="icon">chevron_left</span></span>
+                <span class="banner__nav banner__nav--next is-arrow" data-dir="next"><span class="icon">chevron_right</span></span>
+                <div class="banner__body">
+                  <div class="banner__text">
+                    <p class="t-label">2026 상반기 필수 과정</p>
+                    <p class="t-title">직무 역량을 완성하는 KMA 자격과정 모음전</p>
+                    <p class="t-sm">지금 수강 신청하고 최대 30% 할인 받으세요</p>
+                  </div>
+                  <span class="banner__dots">
+                    <span class="banner__dot is-active"></span>
+                    <span class="banner__dot"></span>
+                    <span class="banner__dot"></span>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== 페이지네이션 ==================== -->
+        <section class="section" id="pagination">
+          <div class="section__head">
+            <p class="eyebrow">네비게이션</p>
+            <h2 class="section__title">페이지네이션</h2>
+          </div>
+          <div class="card">
+            <div class="card__head">
+              <span class="live"><span class="live__dot"></span>LIVE PREVIEW</span>
+              <span class="card__hint">출처 · 피드상세 개선안</span>
+            </div>
+            <div class="preview">
+              <div class="pager" data-single>
+                <span class="pager__btn is-arrow" data-dir="prev"><span class="icon icon--sm">chevron_left</span></span>
+                <span class="pager__btn is-active">1</span>
+                <span class="pager__btn">2</span>
+                <span class="pager__btn">3</span>
+                <span class="pager__btn">4</span>
+                <span class="pager__btn">5</span>
+                <span class="pager__btn">6</span>
+                <span class="pager__btn is-arrow" data-dir="next"><span class="icon icon--sm">chevron_right</span></span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== 섹션 헤더 ==================== -->
+        <section class="section" id="view-all">
+          <div class="section__head">
+            <p class="eyebrow">네비게이션</p>
+            <h2 class="section__title">섹션 헤더</h2>
+          </div>
+          <div class="card">
+            <div class="card__head">
+              <span class="live"><span class="live__dot"></span>LIVE PREVIEW</span>
+              <span class="card__hint">출처 · 오리지널 / 브리프 / 피드 개선안</span>
+            </div>
+            <div class="preview">
+              <div class="preview__group">
+                <div class="list-head">
+                  <div class="list-head__left">
+                    <span class="list-head__title">최고경영자조찬회</span>
+                    <span class="list-head__tip">국내 최장수 CEO 조찬 강연 — 매월 각계 리더가 전하는 경영 통찰</span>
+                  </div>
+                  <button class="btn btn--text" type="button" data-toast="전체보기">전체보기 <span class="icon icon--sm icon--after">chevron_right</span></button>
+                </div>
+              </div>
+              <div class="preview__group">
+                <div class="list-head">
+                  <div class="list-head__left">
+                    <span class="list-head__title">에스프레소</span>
+                    <span class="list-head__tip">하루 한 잔처럼 짧게 마시는 인사이트 — 20분 내외 핵심 요약 강연</span>
+                  </div>
+                  <button class="btn btn--text" type="button" data-toast="전체보기">전체보기 <span class="icon icon--sm icon--after">chevron_right</span></button>
+                </div>
+              </div>
+              <div class="preview__group">
+                <div class="list-head">
+                  <div class="list-head__left"><span class="list-head__title">전체 콘텐츠</span></div>
+                  <span class="t-caption">총 24개</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== 검색바 ==================== -->
+        <section class="section" id="search-bar">
+          <div class="section__head">
+            <p class="eyebrow">네비게이션</p>
+            <h2 class="section__title">검색바</h2>
+          </div>
+          <div class="card">
+            <div class="card__head">
+              <span class="live"><span class="live__dot"></span>LIVE PREVIEW</span>
+              <span class="card__hint">출처 · 검색 / 이러닝 개선안</span>
+            </div>
+            <div class="preview">
+              <div class="preview__group">
+                <p class="preview__label">통합 검색</p>
+                <div class="searchbar">
+                  <span class="icon searchbar__icon">search</span>
+                  <input class="searchbar__input" type="text" placeholder="강연 · 연사 · 키워드를 검색해보세요" />
+                </div>
+              </div>
+              <div class="preview__group">
+                <p class="preview__label">이러닝 검색</p>
+                <div class="searchbar">
+                  <span class="icon searchbar__icon">search</span>
+                  <input class="searchbar__input" type="text" placeholder="배우고 싶은 과정을 검색해보세요" />
+                </div>
+              </div>
+              <div class="preview__divider">
+                <p class="preview__label">추천 검색어</p>
+                <div class="chip-row" data-chip-group="keyword">
+                  <button class="chip" type="button">AI 리터러시</button>
+                  <button class="chip" type="button">리더십</button>
+                  <button class="chip" type="button">조직문화</button>
+                  <button class="chip" type="button">경제전망</button>
+                  <button class="chip" type="button">커뮤니케이션</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== 카테고리 필터 ==================== -->
+        <section class="section" id="category-filter">
+          <div class="section__head">
+            <p class="eyebrow">네비게이션</p>
+            <h2 class="section__title">카테고리 필터</h2>
+          </div>
+          <div class="card">
+            <div class="card__head">
+              <span class="live"><span class="live__dot"></span>LIVE PREVIEW</span>
+              <span class="card__hint">출처 · 이러닝 / 이러닝 전체 개선안</span>
+            </div>
+            <div class="preview">
+              <div class="filter">
+                <div class="filter__group" data-toggle-group>
+                  <p class="filter__title">카테고리</p>
+                  <p class="filter__row is-on"><span class="filter__box"></span>법정의무교육<span class="filter__count">12</span></p>
+                  <p class="filter__row"><span class="filter__box"></span>이러닝<span class="filter__count">96</span></p>
+                  <p class="filter__row"><span class="filter__box"></span>자격과정<span class="filter__count">24</span></p>
+                </div>
+                <div class="filter__group" data-toggle-group>
+                  <p class="filter__title">난이도</p>
+                  <p class="filter__row"><span class="filter__box"></span>입문<span class="filter__count">42</span></p>
+                  <p class="filter__row is-on"><span class="filter__box"></span>중급<span class="filter__count">58</span></p>
+                  <p class="filter__row"><span class="filter__box"></span>고급<span class="filter__count">24</span></p>
+                </div>
+                <div class="filter__group" data-toggle-group>
+                  <p class="filter__title">가격</p>
+                  <p class="filter__row"><span class="filter__box"></span>무료<span class="filter__count">33</span></p>
+                  <p class="filter__row"><span class="filter__box"></span>유료<span class="filter__count">84</span></p>
+                  <p class="filter__row"><span class="filter__box"></span>회원사 무료<span class="filter__count">51</span></p>
+                </div>
+                <button class="btn btn--outline btn--sm btn--block" type="button" data-toast="필터 초기화">필터 초기화</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== 정렬 드롭다운 ==================== -->
+        <section class="section" id="sort-dropdown">
+          <div class="section__head">
+            <p class="eyebrow">네비게이션</p>
+            <h2 class="section__title">정렬 드롭다운</h2>
+          </div>
+          <div class="card">
+            <div class="card__head">
+              <span class="live"><span class="live__dot"></span>LIVE PREVIEW</span>
+              <span class="card__hint">출처 · 이러닝 전체 개선안</span>
+            </div>
+            <div class="preview">
+              <div class="preview__group">
+                <span class="select is-open" data-select><span class="select__value">인기순</span><span class="icon icon--sm select__caret">expand_more</span></span>
+                <div class="select-list">
+                  <p class="select-list__item is-active">인기순</p>
+                  <p class="select-list__item">낮은 가격순</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== 사이드바 ==================== -->
+        <section class="section" id="sidebar-comp">
+          <div class="section__head">
+            <p class="eyebrow">레이아웃</p>
+            <h2 class="section__title">사이드바</h2>
+          </div>
+          <div class="card">
+            <div class="card__head">
+              <span class="live"><span class="live__dot"></span>LIVE PREVIEW</span>
+              <span class="card__hint">출처 · 개선안 전 화면 공통 (navMain · navSub)</span>
+            </div>
+            <div class="preview">
+              <div class="grid grid--half">
+                <div class="preview__group">
+                  <p class="preview__label">메인 메뉴</p>
+                  <div class="chip-row" data-chip-group="nav-main">
+                    <button class="chip" type="button">홈</button>
+                    <button class="chip" type="button">오리지널</button>
+                    <button class="chip" type="button">브리프</button>
+                    <button class="chip" type="button">피드</button>
+                    <button class="chip" type="button">이러닝</button>
+                    <button class="chip is-active" type="button">ASK HR</button>
+                    <button class="chip" type="button">라이브</button>
+                  </div>
+                </div>
+                <div class="preview__group">
+                  <p class="preview__label">서브 메뉴</p>
+                  <div class="chip-row">
+                    <button class="chip" type="button">검색</button>
+                    <button class="chip" type="button">라이브러리</button>
+                    <button class="chip" type="button">마이스튜디오</button>
+                    <button class="chip" type="button">멤버십 보러가기</button>
+                  </div>
+                </div>
+              </div>
+              <div class="preview__divider">
+                <p class="preview__label">하단 고정</p>
+                <button class="btn btn--outline" type="button" data-toast="우리회사 LXP 바로가기">우리회사 LXP 바로가기</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== 마이스튜디오 사이드바 ==================== -->
+        <section class="section" id="mystudio-sidebar">
+          <div class="section__head">
+            <p class="eyebrow">레이아웃</p>
+            <h2 class="section__title">마이스튜디오 사이드바</h2>
+          </div>
+          <div class="placeholder placeholder--doc">
+            <p class="placeholder__title">아직 표시할 내용이 없습니다.</p>
+          </div>
+        </section>
+
+        <!-- ==================== 헤더 · 푸터 ==================== -->
+        <section class="section" id="header-footer">
+          <div class="section__head">
+            <p class="eyebrow">레이아웃</p>
+            <h2 class="section__title">헤더 · 푸터</h2>
+          </div>
+          <div class="card">
+            <div class="card__head">
+              <span class="live"><span class="live__dot"></span>LIVE PREVIEW</span>
+              <span class="card__hint">출처 · 개선안 전 화면 공통</span>
+            </div>
+            <div class="preview">
+              <div class="preview__group">
+                <p class="preview__label">헤더</p>
+                <div class="appbar-demo">
+                  <span class="t-body-strong">홈</span>
+                  <span class="appbar-demo__user">
+                    <span class="avatar avatar--sm"></span>
+                    <span><strong>장예지</strong>님, 안녕하세요!</span>
+                    <span class="t-caption">로그아웃</span>
+                  </span>
+                </div>
+              </div>
+              <div class="preview__divider">
+                <p class="preview__label">푸터</p>
+                <div class="footer-demo">
+                  <div class="footer-demo__col">
+                    <span>KMA stud.io | 사단법인 한국능률협회 | 상근부회장 최권석</span>
+                    <span>사업자등록번호: 105-82-01810 | 통신판매업신고: 2010-서울영등포-0460</span>
+                    <span>서울특별시 영등포구 여의사당대로 22 이룸센터 8-10층 (8-9층 본회, 10층 공개교육센터)</span>
+                    <span>Copyright © 2024 by KMA. All rights reserved.</span>
+                  </div>
+                  <div class="footer-demo__col">
+                    <span class="footer-demo__links">
+                      <span>이용약관</span><span>·</span><span>개인정보 처리방침</span><span>·</span><span>공지사항</span><span>·</span><span>FAQ</span><span>·</span><span>1:1 문의</span><span>·</span><span>이용자가이드</span>
+                    </span>
+                    <span>이용문의 | studio@kma.or.kr</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== 메인 배너 ==================== -->
+        <section class="section" id="main-banner">
+          <div class="section__head">
+            <p class="eyebrow">레이아웃</p>
+            <h2 class="section__title">메인 배너</h2>
+          </div>
+          <div class="card">
+            <div class="card__head">
+              <span class="live"><span class="live__dot"></span>LIVE PREVIEW</span>
+              <span class="card__hint">출처 · 이러닝 개선안 (banners · lawPoints)</span>
+            </div>
+            <div class="preview">
+              <div class="banner" data-single>
+                <span class="banner__nav banner__nav--prev is-arrow" data-dir="prev"><span class="icon">chevron_left</span></span>
+                <span class="banner__nav banner__nav--next is-arrow" data-dir="next"><span class="icon">chevron_right</span></span>
+                <div class="banner__body">
+                  <div class="banner__text">
+                    <p class="t-label">법정의무교육</p>
+                    <p class="t-title">한 번에 끝내는 5대 법정의무교육</p>
+                    <p class="t-sm">미이수 걱정 없이, 올해 의무교육을 완료하세요</p>
+                  </div>
+                  <span class="banner__dots">
+                    <span class="banner__dot"></span>
+                    <span class="banner__dot is-active"></span>
+                    <span class="banner__dot"></span>
+                  </span>
+                </div>
+              </div>
+              <div class="preview__divider">
+                <p class="preview__label">법정의무교육 세로 배너</p>
+                <div class="course-card">
+                  <span class="tag tag--fill">회원사 혜택 · 무료</span>
+                  <p class="t-subhead">5대 법정의무교육<br />한 번에 끝내기</p>
+                  <div class="flow flow--xs">
+                    <p class="t-sm"><span class="icon icon--sm icon--brand">check</span> 회원사 임직원 무료 수강</p>
+                    <p class="t-sm"><span class="icon icon--sm icon--brand">check</span> 5대 법정의무교육 전 과정</p>
+                    <p class="t-sm"><span class="icon icon--sm icon--brand">check</span> 이수확인증 즉시 발급</p>
+                  </div>
+                  <button class="btn btn--primary btn--block" type="button" data-toast="지금 신청하기">지금 신청하기 <span class="icon icon--sm icon--after">chevron_right</span></button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== 라이브 콘텐츠 바 ==================== -->
+        <section class="section" id="live-bar">
+          <div class="section__head">
+            <p class="eyebrow">레이아웃</p>
+            <h2 class="section__title">라이브 콘텐츠 바</h2>
+          </div>
+          <div class="card">
+            <div class="card__head">
+              <span class="live"><span class="live__dot"></span>LIVE PREVIEW</span>
+              <span class="card__hint">출처 · 오리지널 / 라이브 개선안</span>
+            </div>
+            <div class="preview">
+              <div class="preview__group">
+                <p class="preview__label">홈 · 오리지널 진입 바</p>
+                <div class="livebar">
+                  <span class="tag tag--fill">D-1</span>
+                  <span class="t-label">LIVE 예정</span>
+                  <span class="livebar__title">제217회 리더스포럼 · 2026. 7. 10 (금) 오전 7:00</span>
+                  <button class="btn btn--outline btn--sm" type="button" data-toast="라이브 바로가기">라이브 바로가기 <span class="icon icon--sm icon--after">chevron_right</span></button>
+                </div>
+              </div>
+              <div class="preview__group">
+                <p class="preview__label">카운트다운</p>
+                <div class="livebar">
+                  <span class="livebar__title">LIVE 시작 전</span>
+                  <span class="livebar__count">
+                    <span class="livebar__unit"><span class="livebar__num">01</span><span class="livebar__label">DAY</span></span>
+                    <span class="livebar__unit"><span class="livebar__num">15</span><span class="livebar__label">HOUR</span></span>
+                    <span class="livebar__unit"><span class="livebar__num">24</span><span class="livebar__label">MIN</span></span>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== 모달 포탈 ==================== -->
+        <section class="section" id="modal-portal">
+          <div class="section__head">
+            <p class="eyebrow">모달 · 오버레이</p>
+            <h2 class="section__title">모달 포탈</h2>
+          </div>
+          <div class="card">
+            <div class="card__head">
+              <span class="live"><span class="live__dot"></span>LIVE PREVIEW</span>
+              <span class="card__hint">출처 · 홈 개선안 (클립 모달)</span>
+            </div>
+            <div class="preview">
+              <div class="modal-demo">
+                <span class="modal-demo__scrim"></span>
+                <div class="modal-demo__box">
+                  <p class="t-label">CLIP · 특별한클라스</p>
+                  <p class="t-subhead">창의력은 배고픔에서 나옵니다</p>
+                  <p class="t-caption">이 클립이 포함된 강연</p>
+                  <p class="t-body-strong">Ep.1 연애를 망설이는 시대</p>
+                  <button class="btn btn--primary btn--block" type="button" data-toast="강연 전체보기">강연 전체보기 <span class="icon icon--sm icon--after">chevron_right</span></button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== 우편번호 검색 모달 ==================== -->
+        <section class="section" id="postcode-modal">
+          <div class="section__head">
+            <p class="eyebrow">모달 · 오버레이</p>
+            <h2 class="section__title">우편번호 검색 모달</h2>
+          </div>
+          <div class="placeholder placeholder--doc">
+            <p class="placeholder__title">아직 표시할 내용이 없습니다.</p>
+          </div>
+        </section>
+
+        <!-- ==================== 영상 카드 ==================== -->
+        <section class="section" id="content-box">
+          <div class="section__head">
+            <p class="eyebrow">콘텐츠 카드</p>
+            <h2 class="section__title">영상 카드</h2>
+          </div>
+          <div class="card">
+            <div class="card__head">
+              <span class="live"><span class="live__dot"></span>LIVE PREVIEW</span>
+              <span class="card__hint">출처 · 오리지널 / 브리프 / 에스프레소 개선안</span>
+            </div>
+            <div class="preview">
+              <div class="grid grid--demo">
+                <div class="vcard">
+                  <div class="thumb thumb--wide"><span class="tag tag--dark thumb__br">18:32</span></div>
+                  <span class="series">에스프레소</span>
+                  <p class="t-body-strong">AI와 추론의 경제학</p>
+                  <div class="vcard__speaker"><span class="avatar avatar--xs"></span><span class="vcard__name">조여준 더벤처스 CIO</span></div>
+                  <span class="vcard__date">2026-07-08</span>
+                </div>
+                <div class="vcard">
+                  <div class="thumb thumb--wide"><span class="tag tag--dark thumb__br">52:40</span></div>
+                  <span class="series series--gold">최고경영자조찬회</span>
+                  <p class="t-body-strong">제634회 | 초격차 경영</p>
+                  <div class="vcard__speaker"><span class="avatar avatar--xs"></span><span class="vcard__name">권오현 오렌지플래닛 창업재단 이사장</span></div>
+                  <span class="vcard__date">2026-06-24</span>
+                </div>
+                <div class="vcard">
+                  <div class="thumb thumb--wide">
+
+                    <span class="tag tag--dark thumb__br">27:33</span>
+                    <span class="thumb__progress"><span data-bar></span></span>
+                  </div>
+                  <span class="series">DO+</span>
+                  <p class="t-body-strong">관계의 그린라이트를 켜는 DISC part 1</p>
+                  <div class="vcard__speaker"><span class="avatar avatar--xs"></span><span class="vcard__name">오경임 강사</span></div>
+                  <span class="vcard__date">2026-06-11</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== 이러닝 카드 ==================== -->
+        <section class="section" id="elearning-box">
+          <div class="section__head">
+            <p class="eyebrow">콘텐츠 카드</p>
+            <h2 class="section__title">이러닝 카드</h2>
+          </div>
+          <div class="card">
+            <div class="card__head">
+              <span class="live"><span class="live__dot"></span>LIVE PREVIEW</span>
+              <span class="card__hint">출처 · 이러닝 개선안 v2 (BEST 인기 과정)</span>
+            </div>
+            <div class="preview">
+              <div class="grid grid--demo">
+                <div class="ecard">
+                  <div class="thumb thumb--course"><span class="tag tag--lv-inter thumb__tl">중급</span><span class="tag tag--count thumb__tr">10+ <span class="icon">favorite</span></span></div>
+                  <p class="ecard__title">[전략][도로교통사고감정사] 1차 시험대비 이론 완성 과정</p>
+                  <p class="ecard__meta">평생소장 · 약 10시간 · 사전지식 필요</p>
+                  <p class="ecard__price"><span class="ecard__rate">최저가</span><span class="ecard__amount">135,000원~</span></p>
+                  <div class="tag-row"><span class="tag tag--new">NEW</span></div>
+                </div>
+                <div class="ecard">
+                  <div class="thumb thumb--course"><span class="tag tag--lv-adv thumb__tl">고급</span><span class="tag tag--count thumb__tr">10+ <span class="icon">favorite</span></span></div>
+                  <p class="ecard__title">고용관련세액공제 특강: 놓치면 손해인 절세 포인트</p>
+                  <p class="ecard__meta">평생소장 · 약 8시간 · 누구나</p>
+                  <p class="ecard__price"><span class="ecard__rate">10%</span><span class="ecard__amount">72,000원</span></p>
+                  <div class="tag-row"><span class="tag tag--new">NEW</span><span class="tag tag--neutral">온라인</span></div>
+                </div>
+                <div class="ecard">
+                  <div class="thumb thumb--course"><span class="tag tag--lv-basic thumb__tl">입문</span><span class="tag tag--count thumb__tr">10+ <span class="icon">favorite</span></span></div>
+                  <p class="ecard__title">지능정보서비스 과의존, 왜 문제가 될까?</p>
+                  <p class="ecard__meta">평생소장 · 약 4시간 · 누구나</p>
+                  <p class="ecard__price"><span class="ecard__rate">10%</span><span class="ecard__amount">36,000원</span></p>
+                  <div class="tag-row"><span class="tag tag--new">NEW</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== 클립 카드 ==================== -->
+        <section class="section" id="shorts-box">
+          <div class="section__head">
+            <p class="eyebrow">콘텐츠 카드</p>
+            <h2 class="section__title">클립 카드</h2>
+          </div>
+          <div class="card">
+            <div class="card__head">
+              <span class="live"><span class="live__dot"></span>LIVE PREVIEW</span>
+              <span class="card__hint">출처 · 홈 개선안 (베스트클립)</span>
+            </div>
+            <div class="preview">
+              <div class="grid grid--demo">
+                <div class="thumb thumb--tall">
+                  <span class="tag tag--dark thumb__tr">0:58</span>
+                  <span class="thumb__foot"><span class="thumb__foot-title">창의력은 배고픔에서 나옵니다</span></span>
+                </div>
+                <div class="thumb thumb--tall">
+                  <span class="tag tag--dark thumb__tr">1:05</span>
+                  <span class="thumb__foot"><span class="thumb__foot-title">충성 고객을 만드는 방법</span></span>
+                </div>
+                <div class="thumb thumb--tall">
+                  <span class="tag tag--dark thumb__tr">1:20</span>
+                  <span class="thumb__foot"><span class="thumb__foot-title">AI가 우리 콘텐츠를 읽게 하는 법</span></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== 공개 예정 카드 ==================== -->
+        <section class="section" id="upcoming-box">
+          <div class="section__head">
+            <p class="eyebrow">콘텐츠 카드</p>
+            <h2 class="section__title">공개 예정 카드</h2>
+          </div>
+          <div class="card">
+            <div class="card__head">
+              <span class="live"><span class="live__dot"></span>LIVE PREVIEW</span>
+              <span class="card__hint">출처 · 홈 개선안 v2 (D-1 LIVE 예정)</span>
+            </div>
+            <div class="preview">
+              <div class="preview__group">
+                <p class="preview__label">히어로 행 <span>· 원본 <code>1.62fr 1fr · gap 22px</code> — 카드는 우측 컬럼(본문 폭의 37.5%)입니다</span></p>
+                <div class="grid grid--hero">
+                  <div class="thumb thumb--wide"></div>
+                  <div class="livecard">
+                    <div class="livecard__head">
+                      <div class="livecard__top">
+                        <span class="tag tag--fill">D-1</span>
+                        <span class="livecard__state">LIVE 예정</span>
+                      </div>
+                      <p class="livecard__round">제217회 리더스포럼 LIVE</p>
+                      <p class="livecard__title">멘탈 회복탄력성: 번아웃을 막는 '건강한 남 탓'의 미학</p>
+                      <p class="livecard__date">2026. 7. 10 (금) 07:00 시작</p>
+                    </div>
+                    <div class="livecard__foot">
+                      <div class="livecard__person">
+                        <span class="avatar avatar--lg"></span>
+                        <span class="livecard__who">
+                          <span class="livecard__name">정일영</span>
+                          <span class="livecard__role">박사</span>
+                        </span>
+                      </div>
+                      <span class="livecard__left">01일 15시간 24분 남음</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== 이전 콘텐츠 박스 ==================== -->
+        <section class="section" id="prev-content">
+          <div class="section__head">
+            <p class="eyebrow">콘텐츠 카드</p>
+            <h2 class="section__title">이전 콘텐츠 박스</h2>
+          </div>
+          <div class="placeholder placeholder--doc">
+            <p class="placeholder__title">아직 표시할 내용이 없습니다.</p>
+          </div>
+        </section>
+
+        <!-- ==================== 영상 상세 ==================== -->
+        <section class="section" id="video-detail">
+          <div class="section__head">
+            <p class="eyebrow">상세 화면</p>
+            <h2 class="section__title">영상 상세</h2>
+          </div>
+          <div class="card">
+            <div class="card__head">
+              <span class="live"><span class="live__dot"></span>LIVE PREVIEW</span>
+              <span class="card__hint">출처 · 영상 상세 / 브리프 영상 상세 개선안</span>
+            </div>
+            <div class="preview">
+              <div class="player">
+                <div class="player__stage">
+                  <span class="player__play"><span class="icon icon--fill">play_arrow</span></span>
+                  <div class="player__bar">
+                    <div class="player__track"><span></span></div>
+                    <div class="player__ctl">
+                      <span class="icon icon--sm icon--fill">play_arrow</span>
+                      <span>00:00 / 25:07</span>
+                      <span class="player__ctl-right">
+                        <span class="player__opt">1.0×</span>
+                        <span class="player__opt">오디오 모드</span>
+                        <span class="icon icon--sm">fullscreen</span>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <div class="player__panel">
+                  <div class="player__tabs" data-tabs>
+                    <span class="player__tab is-active" data-tab="summary">AI 요약</span>
+                    <span class="player__tab" data-tab="note">노트</span>
+                    <span class="player__tab" data-tab="docs">강의자료</span>
+                  </div>
+                  <div class="player__body" data-panel="summary">
+                    <p class="player__note"><span class="icon icon--brand">smart_toy</span><span class="player__text">AI가 요약한 핵심 내용을 확인해보세요.</span></p>
+                    <p class="player__line"><span class="player__n">1</span><span class="player__text">연애 기피는 의지의 문제가 아니라 에너지의 문제 — 회복되지 않은 상태에서 관계는 부담으로 느껴진다.</span></p>
+                    <p class="player__line"><span class="player__n">2</span><span class="player__text">정보 과잉이 오히려 완벽을 만든다: 비교 기준이 많아질수록 "확신이 들 때까지" 미루게 된다.</span></p>
+                    <p class="player__line"><span class="player__n">3</span><span class="player__text">관계의 시작은 확신이 아니라 호기심 — 작은 접촉면을 늘리는 것이 심리학이 권하는 첫걸음.</span></p>
+                  </div>
+                  <div class="player__body" data-panel="note" hidden>
+                    <div class="placeholder">
+                      <span class="icon icon--lg placeholder__icon">stylus_note</span>
+                      <p class="placeholder__title">이 영상의 첫 노트를 남겨보세요</p>
+                      <p class="placeholder__desc">재생 중 <strong>N 키</strong>를 누르면 현재 시점이 함께 저장돼요.<br />노트는 라이브러리 · 노트 탭에 모입니다.</p>
+                      <button class="btn btn--primary btn--sm" type="button" data-toast="현재 시점에 노트 쓰기">현재 시점에 노트 쓰기</button>
+                    </div>
+                  </div>
+                  <div class="player__body" data-panel="docs" hidden>
+                    <p class="player__file">
+                      <span class="tag tag--fill">PDF</span>
+                      <span class="player__file-body">
+                        <span class="player__file-name">Ep.1 강연 슬라이드 요약본</span>
+                        <span class="player__file-size">1.2MB</span>
+                      </span>
+                      <span class="player__file-act">다운로드</span>
+                    </p>
+                    <p class="player__hint">자료는 회원사 임직원만 다운로드할 수 있어요.</p>
+                  </div>
+                </div>
+              </div>
+              <div class="preview__divider">
+                <p class="preview__label">본문 메타</p>
+                <div class="flow flow--sm">
+                  <div class="row">
+                    <span class="series series--green">특별한클라스</span>
+                    <span class="t-num">2026.07.07 · 25:07</span>
+                    <span class="detail__acts">
+                      <button class="btn btn--outline btn--sm" type="button" aria-pressed="false"
+                              data-toggle-btn data-toast-on="저장했어요" data-toast-off="저장을 해제했어요">
+                        <span class="icon icon--sm">bookmark</span>저장
+                      </button>
+                      <button class="btn btn--outline btn--sm" type="button" aria-pressed="false"
+                              data-toggle-btn data-toast-on="찜 목록에 담았어요" data-toast-off="찜을 해제했어요">
+                        <span class="icon icon--sm">favorite</span>찜
+                      </button>
+                      <button class="btn btn--outline btn--sm" type="button" data-toast="공유 링크를 복사했어요">
+                        <span class="icon icon--sm">share</span>공유
+                      </button>
+                    </span>
+                  </div>
+                  <p class="t-title">Ep.1 연애를 망설이는 시대</p>
+                  <p class="t-body">소개팅 앱도, 연애 상담도, 정보도 넘쳐나는 시대지만 정작 누군가를 만나 관계를 이어가는 일은 예전보다 더 어려워진 것처럼 느껴집니다. 왜 우리는 사람을 원하면서도 망설이게 될까요? 정신건강의학과 허규형 의사와 함께 관계를 시작할 용기의 심리학을 이야기합니다.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== 커리큘럼 목록 ==================== -->
+        <section class="section" id="curriculum">
+          <div class="section__head">
+            <p class="eyebrow">상세 화면</p>
+            <h2 class="section__title">커리큘럼 목록</h2>
+          </div>
+          <div class="card">
+            <div class="card__head">
+              <span class="live"><span class="live__dot"></span>LIVE PREVIEW</span>
+              <span class="card__hint">출처 · 이러닝 상세 / 브리프 개선안</span>
+            </div>
+            <div class="preview">
+              <div class="curri">
+                <div class="curri__row is-current"><span class="curri__num">01</span><span class="curri__title">장애를 바라보는 인식과 편견</span><span class="curri__dur">18:20</span></div>
+                <div class="curri__row"><span class="curri__num">02</span><span class="curri__title">장애인 고용 정책의 변화</span><span class="curri__dur">16:45</span></div>
+                <div class="curri__row"><span class="curri__num">03</span><span class="curri__title">직장 내 소통 방법과 에티켓</span><span class="curri__dur">19:10</span></div>
+                <div class="curri__row"><span class="curri__num">04</span><span class="curri__title">포용적 직장 문화 만들기</span><span class="curri__dur">11:37</span></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== 추천 시리즈 ==================== -->
+        <section class="section" id="rec-series">
+          <div class="section__head">
+            <p class="eyebrow">상세 화면</p>
+            <h2 class="section__title">추천 시리즈</h2>
+          </div>
+          <div class="card">
+            <div class="card__head">
+              <span class="live"><span class="live__dot"></span>LIVE PREVIEW</span>
+              <span class="card__hint">출처 · 브리프 개선안 (추천 시리즈 패널)</span>
+            </div>
+            <div class="preview">
+              <div class="sercard">
+                <div class="sercard__head">
+                  <p class="series">DO+</p>
+                  <div class="sercard__row">
+                    <p class="sercard__title">관계의 그린라이트를 켜는 DISC</p>
+                    <span class="sercard__pct">1/2 완료</span>
+                  </div>
+                </div>
+                <div class="progress progress--sm"><div class="progress__bar" data-bar></div></div>
+                <div class="sercard__parts">
+                  <div class="sercard__part is-done">
+                    <span class="icon sercard__mark">check</span>
+                    <span class="sercard__name">part 1 — 유형 이해</span>
+                    <span class="sercard__dur">27:33</span>
+                  </div>
+                  <div class="sercard__part">
+                    <span class="icon icon--fill sercard__mark">play_arrow</span>
+                    <span class="sercard__name">part 2 — 유형별 소통 실전</span>
+                    <span class="sercard__dur">26:40</span>
+                  </div>
+                </div>
+                <button class="btn btn--primary btn--block" type="button" data-toast="시리즈 보러가기">시리즈 보러가기</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== 리뷰 목록 ==================== -->
+        <section class="section" id="review-list">
+          <div class="section__head">
+            <p class="eyebrow">상세 화면</p>
+            <h2 class="section__title">리뷰 목록</h2>
+          </div>
+          <div class="card">
+            <div class="card__head">
+              <span class="live"><span class="live__dot"></span>LIVE PREVIEW</span>
+              <span class="card__hint">출처 · 이러닝 상세 / 라이브러리 개선안</span>
+            </div>
+            <div class="preview">
+              <div class="preview__group">
+                <div class="row">
+                  <span class="t-heading">수강평</span>
+                  <span class="t-body-strong">★ 4.7</span>
+                  <span class="t-caption">312개</span>
+                </div>
+                <div class="review">
+                  <div class="review__head"><span class="stars">★★★★★</span></div>
+                  <p class="review__body">사례 중심이라 지루하지 않았어요. 특히 3챕터의 상황별 에티켓은 바로 팀에 공유했습니다.</p>
+                </div>
+                <div class="review">
+                  <div class="review__head"><span class="stars">★★★★<span class="is-off">★</span></span></div>
+                  <p class="review__body">법정 교육 중 제일 부담 없는 구성. 1시간이 금방 가고 수료 처리도 바로 됩니다.</p>
+                </div>
+              </div>
+              <div class="preview__divider">
+                <p class="preview__label">라이브러리 리뷰</p>
+                <div class="review">
+                  <div class="review__head"><span class="stars">★★★★★</span><span class="t-body-strong">제216회 | 트레바리: 결핍과 비즈니스를 잇다</span></div>
+                  <p class="review__body">시장을 보는 관점이 바뀌었습니다. 사례가 구체적이라 바로 업무에 적용해볼 만해요.</p>
+                  <span class="review__date">2026.07.06</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== 리뷰 작성 ==================== -->
+        <section class="section" id="review-modal">
+          <div class="section__head">
+            <p class="eyebrow">상세 화면</p>
+            <h2 class="section__title">리뷰 작성</h2>
+          </div>
+          <div class="card">
+            <div class="card__head">
+              <span class="live"><span class="live__dot"></span>LIVE PREVIEW</span>
+              <span class="card__hint">출처 · 영상 상세 / 이러닝 상세 개선안</span>
+            </div>
+            <div class="preview">
+              <div class="grid grid--half">
+                <div class="preview__group">
+                  <p class="preview__label">영상 상세</p>
+                  <div class="course-card">
+                    <div class="review__head">
+                      <span class="avatar avatar--md"></span>
+                      <span class="t-body-strong">장예지</span>
+                      <span class="stars stars--input" data-stars><span class="stars__star" data-star="1">★</span><span class="stars__star" data-star="2">★</span><span class="stars__star" data-star="3">★</span><span class="stars__star" data-star="4">★</span><span class="stars__star is-off" data-star="5">★</span></span>
+                    </div>
+                    <label class="field">
+                      <textarea class="field__area" placeholder="이 영상에 대한 생각을 남겨보세요."></textarea>
+                    </label>
+                    <div class="row row--between">
+                      <span></span>
+                      <button class="btn btn--primary btn--sm" type="button" data-toast="리뷰 등록">리뷰 등록</button>
+                    </div>
+                  </div>
+                </div>
+                <div class="preview__group">
+                  <p class="preview__label">이러닝 상세</p>
+                  <div class="course-card">
+                    <div class="review__head">
+                      <span class="t-body-strong">수강평 작성</span>
+                      <span class="stars stars--input" data-stars><span class="stars__star is-off" data-star="1">★</span><span class="stars__star is-off" data-star="2">★</span><span class="stars__star is-off" data-star="3">★</span><span class="stars__star is-off" data-star="4">★</span><span class="stars__star is-off" data-star="5">★</span></span>
+                    </div>
+                    <label class="field">
+                      <textarea class="field__area" placeholder="수강 경험을 다른 학습자와 나눠주세요"></textarea>
+                    </label>
+                    <div class="row row--between">
+                      <span></span>
+                      <button class="btn btn--primary btn--sm" type="button" data-toast="등록">등록</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== 강사 프로필 ==================== -->
+        <section class="section" id="tutor-profile">
+          <div class="section__head">
+            <p class="eyebrow">상세 화면</p>
+            <h2 class="section__title">강사 프로필</h2>
+          </div>
+          <div class="card">
+            <div class="card__head">
+              <span class="live"><span class="live__dot"></span>LIVE PREVIEW</span>
+              <span class="card__hint">출처 · 이러닝 상세 / 라이브러리 개선안</span>
+            </div>
+            <div class="preview">
+              <div class="preview__group">
+                <p class="preview__label">이러닝 상세 · 강사</p>
+                <div class="tutor">
+                  <span class="avatar avatar--xl"></span>
+                  <div class="flow flow--xs">
+                    <p class="t-subhead">박준식</p>
+                    <p class="t-caption">한국양성평등교육진흥원 전문강사 · 한국장애인고용공단 전문강사 · 행정안전부 안전전문인력</p>
+                  </div>
+                </div>
+              </div>
+              <div class="preview__divider">
+                <p class="preview__label">라이브러리 · 강사 카드</p>
+                <div class="grid grid--demo">
+                  <div class="course-card">
+                    <span class="avatar avatar--2xl"></span>
+                    <p class="t-subhead">명승은</p>
+                    <p class="t-caption">VU Networks 대표</p>
+                    <div class="tag-row"><span class="tag tag--success">스타트업 · 트렌드</span></div>
+                  </div>
+                  <div class="course-card">
+                    <span class="avatar avatar--2xl"></span>
+                    <p class="t-subhead">허규형</p>
+                    <p class="t-caption">정신건강의학과 의사</p>
+                    <div class="tag-row"><span class="tag tag--success">멘탈 · 조직건강</span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== 약관 · 안내 모달 ==================== -->
+        <section class="section" id="terms-modal">
+          <div class="section__head">
+            <p class="eyebrow">모달 · 결제</p>
+            <h2 class="section__title">약관 · 안내 모달</h2>
+          </div>
+          <div class="placeholder placeholder--doc">
+            <p class="placeholder__title">아직 표시할 내용이 없습니다.</p>
+          </div>
+        </section>
+
+        <!-- ==================== 결제 요약 ==================== -->
+        <section class="section" id="payment">
+          <div class="section__head">
+            <p class="eyebrow">모달 · 결제</p>
+            <h2 class="section__title">결제 요약</h2>
+          </div>
+          <div class="card">
+            <div class="card__head">
+              <span class="live"><span class="live__dot"></span>LIVE PREVIEW</span>
+              <span class="card__hint">출처 · 이러닝 상세 / 마이스튜디오 설정 개선안</span>
+            </div>
+            <div class="preview">
+              <div class="pay">
+                <div class="pay__row">
+                  <span class="pay__label">멤버십 혜택가</span>
+                  <span class="pay__value"><span class="ecard__rate">10%</span> 135,000원</span>
+                </div>
+                <div class="pay__row">
+                  <span class="pay__label">정가</span>
+                  <span class="pay__value pay__value--strike">150,000원</span>
+                </div>
+                <div class="pay__row pay__total">
+                  <span class="pay__label">총 결제 금액</span>
+                  <span class="pay__value">135,000원</span>
+                </div>
+                <button class="btn btn--outline btn--block" type="button" data-toast="멤버십 가입">Stud.io 멤버십 가입 시, 10% 적용</button>
+                <button class="btn btn--primary btn--block" type="button" data-toast="수강신청">수강신청</button>
+              </div>
+              <div class="preview__divider">
+                <p class="preview__label">결제 내역</p>
+                <div class="table-wrap">
+                  <table class="table">
+                    <thead><tr><th>결제일</th><th>과정</th><th class="is-right">결제 금액</th><th class="is-right">상태</th></tr></thead>
+                    <tbody>
+                      <tr>
+                        <td><span class="table__num">26.06.02</span></td>
+                        <td><p class="table__title">인공지능(AI) 프로젝트 제대로 배우기 PART.4</p><p class="table__sub">회원사 10% 할인 적용</p></td>
+                        <td class="is-right"><span class="table__num">40,500원</span></td>
+                        <td class="is-right"><span class="tag tag--success">결제 완료</span></td>
+                      </tr>
+                      <tr>
+                        <td><span class="table__num">26.01.20</span></td>
+                        <td><p class="table__title">데이터분석 준전문가(ADsP) 대비</p><p class="table__sub">진도율 8%에서 환불 신청</p></td>
+                        <td class="is-right"><span class="table__num">81,000원</span></td>
+                        <td class="is-right"><span class="tag tag--neutral">환불 완료</span></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== 커스텀 탭 ==================== -->
+        <section class="section" id="segmented">
+          <div class="section__head">
+            <p class="eyebrow">네비 · 필터</p>
+            <h2 class="section__title">커스텀 탭</h2>
+          </div>
+          <div class="card">
+            <div class="card__head">
+              <span class="live"><span class="live__dot"></span>LIVE PREVIEW</span>
+              <span class="card__hint">출처 · 마이스튜디오 / 마이스튜디오 설정 개선안</span>
+            </div>
+            <div class="preview">
+              <div class="preview__group">
+                <p class="preview__label">주간 달력 <span>· 세그먼티드 — 홈통 안에서 하나만 선택</span></p>
+                <div class="seg" data-single>
+                  <span class="seg__btn is-active">교육 일정</span>
+                  <span class="seg__btn">콘텐츠 업로드</span>
+                </div>
+              </div>
+              <div class="preview__group">
+                <p class="preview__label">수강 상태 <span>· 세그먼티드 — 목록을 거르는 값 선택</span></p>
+                <div class="seg" data-single>
+                  <span class="seg__btn is-active">전체</span>
+                  <span class="seg__btn">수강중</span>
+                  <span class="seg__btn">수강완료</span>
+                </div>
+              </div>
+              <div class="preview__group">
+                <p class="preview__label">과정 분류 <span>· 필터 칩 — 홈통 없는 낱개 알약</span></p>
+                <div class="chip-row" data-chip-group="course-cat">
+                  <button class="chip is-active" type="button">전체</button>
+                  <button class="chip" type="button">자격과정</button>
+                  <button class="chip" type="button">이러닝</button>
+                  <button class="chip" type="button">법정의무교육</button>
+                </div>
+              </div>
+              <div class="preview__divider">
+                <p class="preview__label">선택 결과</p>
+                <p class="chip-result"><span class="is-brand" id="chipResult">전체</span> · 총 <strong>24</strong>개 콘텐츠</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card__head">
+              <p class="card__title">비슷해 보이는 네 가지 — 무엇이 다른가</p>
+              <span class="card__hint">원본도 형태로 역할을 구분합니다</span>
+            </div>
+            <div class="table-wrap">
+              <table class="table table--doc">
+                <thead><tr><th class="col-role">컴포넌트</th><th>형태로 구분되는 지점</th><th class="col-spec">클래스</th></tr></thead>
+                <tbody>
+                  <tr>
+                    <td><p class="table__role">세그먼티드</p></td>
+                    <td><span class="table__sample"><span class="seg"><span class="seg__btn is-active">전체</span><span class="seg__btn">수강중</span></span></span><p class="table__sub"><strong>홈통(트랙) 안</strong>에 선택된 알약 하나. 값이 항상 하나 선택돼 있고, 목록을 거르는 용도입니다</p></td>
+                    <td><p class="table__spec">.seg / .seg__btn</p><p class="table__spec-sub">트랙 r10 · p4 · 항목 r8</p></td>
+                  </tr>
+                  <tr>
+                    <td><p class="table__role">필터 칩</p></td>
+                    <td><span class="table__sample"><span class="chip is-active">전체</span><span class="chip">자격과정</span></span><p class="table__sub">홈통 없이 <strong>낱개 알약</strong>. 테두리가 있고 모서리가 완전히 둥급니다</p></td>
+                    <td><p class="table__spec">.chip</p><p class="table__spec-sub">r999 · 테두리 1px</p></td>
+                  </tr>
+                  <tr>
+                    <td><p class="table__role">탭</p></td>
+                    <td><span class="table__sample"><span class="tabs"><span class="tabs__item is-active">콘텐츠</span><span class="tabs__item">노트</span></span></span><p class="table__sub">배경 없이 <strong>밑줄</strong>로만 표시. 화면 전체를 바꿉니다</p></td>
+                    <td><p class="table__spec">.tabs / .tabs__item</p><p class="table__spec-sub">border-bottom 2px</p></td>
+                  </tr>
+                  <tr>
+                    <td><p class="table__role">스위치</p></td>
+                    <td><span class="table__sample"><span class="switch is-on"><span class="switch__knob"></span></span></span><p class="table__sub"><strong>ON / OFF 두 값</strong>만 있는 토글. 값을 고르는 게 아니라 켜고 끕니다</p></td>
+                    <td><p class="table__spec">.switch</p><p class="table__spec-sub">42×24 · 손잡이 18px</p></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== FAQ 아코디언 ==================== -->
+        <section class="section" id="faq">
+          <div class="section__head">
+            <p class="eyebrow">네비 · 필터</p>
+            <h2 class="section__title">FAQ 아코디언</h2>
+          </div>
+          <div class="card">
+            <div class="card__head">
+              <span class="live"><span class="live__dot"></span>LIVE PREVIEW</span>
+              <span class="card__hint">출처 · 마이스튜디오 설정 개선안 (문의 목록)</span>
+            </div>
+            <div class="preview">
+              <div class="accordion" data-accordion>
+                <div class="accordion__item is-open">
+                  <div class="accordion__head" data-accordion-head>
+                    <span class="accordion__meta">
+                      <span class="tag tag--success">답변 완료</span>
+                      <span class="accordion__sub">결제/환불 · 26.06.28</span>
+                    </span>
+                    <span class="accordion__title">법인카드 결제 세금계산서 발급 요청</span>
+                  </div>
+                  <div class="accordion__body">
+                    <p class="accordion__text">6월 2일 결제한 AI 프로젝트 PART.4 건으로 세금계산서 발급 부탁드립니다. 사업자등록번호는 문의 시 등록된 회사 정보와 동일합니다.</p>
+                    <div class="accordion__reply">
+                      <p class="accordion__reply-title">stud.io 답변</p>
+                      <p class="accordion__text">세금계산서가 발급되어 등록된 회사 이메일로 발송되었습니다. 결제 내역 탭의 "세금계산서" 버튼에서도 재다운로드하실 수 있어요.</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="accordion__item">
+                  <div class="accordion__head" data-accordion-head>
+                    <span class="accordion__meta">
+                      <span class="tag tag--success">답변 완료</span>
+                      <span class="accordion__sub">수강 · 26.05.11</span>
+                    </span>
+                    <span class="accordion__title">수강 기한 연장이 가능한가요?</span>
+                  </div>
+                  <div class="accordion__body" hidden>
+                    <p class="accordion__text">개인 사정으로 이번 달 수강을 거의 못 했는데, AI 프로젝트 과정의 수강 기한을 2주 정도 연장할 수 있을까요? 결제는 5월 초에 완료했습니다.</p>
+                    <div class="accordion__reply">
+                      <p class="accordion__reply-title">stud.io 답변</p>
+                      <p class="accordion__text">회원사 임직원은 1회에 한해 최대 30일 연장이 가능합니다. 해당 과정 연장 처리해 드렸고, 마이스튜디오 &gt; 수강 탭에서 변경된 기한을 확인하실 수 있어요.</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="accordion__item">
+                  <div class="accordion__head" data-accordion-head>
+                    <span class="accordion__meta">
+                      <span class="tag tag--pending">답변 대기</span>
+                      <span class="accordion__sub">수료증 · 26.03.30</span>
+                    </span>
+                    <span class="accordion__title">회사 제출용 이수 확인서 양식 문의</span>
+                  </div>
+                  <div class="accordion__body" hidden>
+                    <p class="accordion__text">사내 교육 실적 제출용으로 이수 확인서가 필요합니다. 회사 지정 양식(로고·직인 포함)으로도 발급이 가능한지, 발급까지 얼마나 걸리는지 궁금합니다.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== 난이도 배지 ==================== -->
+        <section class="section" id="badge">
+          <div class="section__head">
+            <p class="eyebrow">배지</p>
+            <h2 class="section__title">난이도 배지</h2>
+          </div>
+          <div class="card">
+            <div class="card__head">
+              <span class="live"><span class="live__dot"></span>LIVE PREVIEW</span>
+              <span class="card__hint">출처 · 이러닝 개선안 (LVMAP)</span>
+            </div>
+            <div class="preview">
+              <div class="preview__group">
+                <p class="preview__label">난이도 <span>· 상태 컬러에 매핑</span></p>
+                <div class="tag-row">
+                  <span class="tag tag--lv-basic">입문</span>
+                  <span class="tag tag--lv-inter">중급</span>
+                  <span class="tag tag--lv-adv">고급</span>
+                </div>
+              </div>
+              <div class="preview__divider">
+                <p class="preview__label">카드 위 배치</p>
+                <div class="ecard">
+                  <div class="thumb thumb--course">
+                    <span class="tag tag--lv-basic thumb__tl">입문</span>
+                    <span class="tag tag--count thumb__tr">10+ <span class="icon">favorite</span></span>
+                  </div>
+                  <p class="t-body-strong">지능정보서비스 과의존, 왜 문제가 될까?</p>
+                  <p class="ecard__meta">평생소장 · 약 4시간 · 누구나</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== 기타 · 유틸 ==================== -->
+        <section class="section" id="utils">
+          <div class="section__head">
+            <p class="eyebrow">기타 · 유틸</p>
+            <h2 class="section__title">기타 · 유틸 컴포넌트</h2>
+          </div>
+          <div class="placeholder placeholder--doc">
+            <p class="placeholder__title">화면에 직접 보이지 않는 유틸입니다</p>
+          </div>
+        </section>
+
+
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- 토스트 -->
+<div class="toast" id="toast">
+  <span class="icon icon--sm icon--fill toast__icon">check_circle</span>
+  <span id="toastMsg">복사했어요</span>
+</div>
+
+<script src="assets/js/script.js"></script>
+</body>
+</html>
