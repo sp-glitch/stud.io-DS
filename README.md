@@ -90,7 +90,7 @@ powershell -ExecutionPolicy Bypass -File build.ps1
 
 CDN 두 곳만 씁니다. 그 외 라이브러리·빌드 도구는 없습니다.
 
-- [SUIT](https://sunn.us/suit/) — 본문 서체
+- [Pretendard](https://github.com/orioncactus/pretendard) — 본문 서체
 - [Material Symbols Outlined](https://fonts.google.com/icons) — 아이콘
 
 ## 출처
