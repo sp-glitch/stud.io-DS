@@ -275,6 +275,13 @@
   --shadow-toast:  0 12px 32px rgba(17, 17, 17, 0.2);
   --shadow-hover:  0 3px 10px rgba(17, 17, 17, 0.07);   /* hover 시 살짝 떠오르는 느낌 */
 
+  /* 떠오르는 카드의 그림자 — box-shadow 가 아니라 filter 에 통째로 넣는 값입니다.
+     카드가 확대되며 아래에 설명 밴드까지 달릴 때, box-shadow 는 상자 모양만 따라
+     이음매가 보이지만 drop-shadow 는 그려진 실루엣을 따라갑니다.
+     라이트에서는 잉크를 옅게, 다크에서는 검정을 짙게 씁니다. */
+  --filter-card:      drop-shadow(0 1px 3px rgba(17, 17, 17, 0.10));
+  --filter-card-lift: drop-shadow(0 12px 26px rgba(17, 17, 17, 0.18)) drop-shadow(0 4px 10px rgba(17, 17, 17, 0.10));
+
   /* ---------------------------------------------------------------
      1-10. 레이아웃
      --------------------------------------------------------------- */
@@ -401,6 +408,9 @@
 
   --shadow-toast: 0 12px 32px rgba(0, 0, 0, 0.55);
   --shadow-hover: 0 3px 10px rgba(0, 0, 0, 0.38);
+
+  --filter-card:      drop-shadow(0 1px 3px rgba(0, 0, 0, 0.28));
+  --filter-card-lift: drop-shadow(0 12px 26px rgba(0, 0, 0, 0.50)) drop-shadow(0 4px 10px rgba(0, 0, 0, 0.30));
 
   /* 어두운 배경에서 글리프가 실제보다 굵어 보이므로 GRAD 로 보정합니다 */
   --icon-grade: -25;
@@ -2355,6 +2365,28 @@ code.is-brand { color: var(--color-brand-700); background: var(--color-brand-50)
 .hero__actions { display: flex; flex-wrap: wrap; gap: var(--spacing-2xs); margin-top: var(--spacing-md); }
 
 /* --------------------------------------------------------------------------
+   시안 목록 — 이 시스템으로 실제로 만들어 본 화면을 한 줄에 하나씩 세웁니다.
+   화면 이름 · 한 줄 설명은 왼쪽에, 다크 · 라이트 두 벌 링크는 오른쪽 끝에 묶습니다.
+   줄 사이는 선으로 나눠 어디까지가 한 화면인지 바로 읽히게 합니다.
+   -------------------------------------------------------------------------- */
+.samplelist { display: flex; flex-direction: column; }
+.samplelist__row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-sm) 0;
+}
+.samplelist__row + .samplelist__row { border-top: var(--border-width) solid var(--border-subtle); }
+.samplelist__body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: var(--spacing-3xs); }
+.samplelist__name { font-size: var(--font-size-body); font-weight: var(--font-weight-semibold); color: var(--text-heading); }
+.samplelist__desc { font-size: var(--font-size-caption); line-height: var(--line-height-snug); color: var(--text-tertiary); }
+.samplelist__links { flex: none; display: flex; flex-wrap: wrap; gap: var(--spacing-2xs); }
+
+@media (max-width: 680px) {
+  .samplelist__row { flex-direction: column; align-items: flex-start; gap: var(--spacing-2xs); }
+}
+
+/* --------------------------------------------------------------------------
    미디어 아이콘 버튼 — 썸네일 위에 얹는 좋아요 · 저장
    .btn--overlay 와 같은 채움 · 테두리 · 글자색을 쓰되 정사각 원형입니다.
    보이고 숨기는 시점은 이 버튼을 담는 카드가 정합니다.
@@ -2624,6 +2656,7 @@ code.is-brand { color: var(--color-brand-700); background: var(--color-brand-50)
       <div class="nav__group">
         <p class="nav__category">시작하기</p>
         <a class="nav__link" href="#intro"><span class="icon">article</span>개요</a>
+        <a class="nav__link" href="#samples"><span class="icon">open_in_new</span>예시 보러가기</a>
       </div>
       <div class="nav__group">
         <p class="nav__category">파운데이션</p>
@@ -2766,9 +2799,44 @@ code.is-brand { color: var(--color-brand-700); background: var(--color-brand-50)
               <div><dt>모드</dt><dd>일반 · LXP · 강사</dd></div>
               <div><dt>최종 수정</dt><dd>2026.07.29</dd></div>
             </dl>
-            <div class="hero__actions">
-              <a class="btn btn--outline btn--sm" href="../samples/home.html">홈 시안 바로가기 <span class="icon icon--sm icon--after">chevron_right</span></a>
-              <a class="btn btn--outline btn--sm" href="../samples/elearning.html">이러닝 시안 바로가기 <span class="icon icon--sm icon--after">chevron_right</span></a>
+          </div>
+        </section>
+
+        <!-- ==================== 예시 보러가기 ==================== -->
+        <section class="section" id="samples">
+          <div class="section__head">
+            <p class="eyebrow">시작하기</p>
+            <h2 class="section__title">예시 보러가기</h2>
+            <p class="section__desc">이 문서의 컴포넌트만으로 만든 실제 화면입니다. 화면마다 <strong>다크</strong>와 <strong>라이트</strong> 두 벌이 있고, 둘은 같은 마크업에 테마만 바꿔 구운 것입니다.</p>
+          </div>
+          <div class="card">
+            <div class="card__head">
+              <span class="live"><span class="live__dot"></span>SAMPLES</span>
+              <span class="card__hint">새 탭이 아니라 같은 창에서 열립니다 — 뒤로가기로 돌아오세요</span>
+            </div>
+            <div class="preview">
+              <div class="samplelist">
+                <div class="samplelist__row">
+                  <div class="samplelist__body">
+                    <p class="samplelist__name">홈</p>
+                    <p class="samplelist__desc">메인 배너 · 최신콘텐츠 · 인기 강의 · 베스트클립 · 시리즈 레일 · 공지사항</p>
+                  </div>
+                  <div class="samplelist__links">
+                    <a class="btn btn--outline btn--sm" href="../samples/home.html"><span class="icon icon--sm">dark_mode</span>다크</a>
+                    <a class="btn btn--outline btn--sm" href="../samples/home-light.html"><span class="icon icon--sm">light_mode</span>라이트</a>
+                  </div>
+                </div>
+                <div class="samplelist__row">
+                  <div class="samplelist__body">
+                    <p class="samplelist__name">이러닝</p>
+                    <p class="samplelist__desc">사진 배너 · BEST 인기 과정 · 카테고리 필터 · 전체 강의 격자. 카드 호버는 확대 + 설명 밴드 방식입니다</p>
+                  </div>
+                  <div class="samplelist__links">
+                    <a class="btn btn--outline btn--sm" href="../samples/elearning.html"><span class="icon icon--sm">dark_mode</span>다크</a>
+                    <a class="btn btn--outline btn--sm" href="../samples/elearning-light.html"><span class="icon icon--sm">light_mode</span>라이트</a>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </section>
