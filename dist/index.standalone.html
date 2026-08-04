@@ -2361,8 +2361,20 @@ code.is-brand { color: var(--color-brand-700); background: var(--color-brand-50)
 /* 큰 원형 — 썸네일 정중앙의 재생 버튼.
    우상단 좋아요 · 저장과 같은 계열이지만 '이 카드를 연다'는 주 동작이라
    배너 화살표(.banner__nav--lg)와 같은 48px 을 쓰고 글리프는 채웁니다.
-   글자 버튼 대신 이 아이콘을 쓰면 카드 4종이 같은 폭 · 같은 무게로 통일됩니다. */
-.mediabtn--lg { --mediabtn-size: 48px; --icon-size: var(--icon-size-lg); --icon-fill: 1; }
+   글자 버튼 대신 이 아이콘을 쓰면 카드 4종이 같은 폭 · 같은 무게로 통일됩니다.
+   주 동작이므로 평상시부터 브랜드색을 씁니다 — 좋아요 · 저장(뉴트럴)과 위계가 갈립니다.
+   호버는 다른 모든 곳과 같이 '민트가 어두워지는' 방향입니다. */
+.mediabtn--lg {
+  --mediabtn-size: 48px;
+  --icon-size: var(--icon-size-lg);
+  --icon-fill: 1;
+  box-shadow: 0 0 0 var(--border-width) var(--color-brand), var(--shadow-hover);
+  color: var(--color-brand);
+}
+.mediabtn--lg:hover {
+  box-shadow: 0 0 0 var(--border-width) var(--color-brand-hover), var(--shadow-hover);
+  color: var(--color-brand-hover);
+}
 
 /* 미디어 위 버튼을 가로로 늘어놓는 문서 전용 받침 */
 .onmedia--row { grid-auto-flow: column; gap: var(--spacing-md); }
@@ -4414,6 +4426,15 @@ code.is-brand { color: var(--color-brand-700); background: var(--color-brand-50)
                   </div>
                   <div class="thumb thumb--tall">
                     <div class="thumb__center"><button class="mediabtn mediabtn--lg" type="button" aria-label="재생" data-toast="재생"><span class="icon">play_arrow</span></button></div>
+                  </div>
+                </div>
+              </div>
+              <div class="preview__divider">
+                <p class="preview__label">나타나는 하단 밴드 <span>· <code>.thumb__foot--reveal</code> 은 설명처럼 뒤늦게 보여 줄 글을 카드 밖으로 내보내지 않고 썸네일 안에서 올려 줍니다. 카드 바깥으로 판을 늘리면 카드가 담긴 상자를 뚫고 나가 어색해집니다. 밴드가 올라오면 우하단 배지는 자리를 내줍니다. <strong>썸네일을 가리켜 보세요</strong></span></p>
+                <div class="grid grid--demo">
+                  <div class="thumb thumb--wide">
+                    <p class="thumb__foot thumb__foot--reveal thumb__foot-title">추론 비용의 하락은 곧 의사결정 비용의 하락 — 질문이 경쟁력이 되는 이유를 압축했습니다.</p>
+                    <span class="tag tag--dark thumb__br">18:32</span>
                   </div>
                 </div>
               </div>
