@@ -2165,6 +2165,32 @@ code.is-brand { color: var(--color-brand-700); background: var(--color-brand-50)
 .banner__body { display: flex; flex-direction: column; min-width: 0; }
 .banner__text { display: flex; flex-direction: column; gap: var(--spacing-2xs); min-width: 0; }
 
+/* 사진 배너 — 자리표시 그라데이션 대신 실제 이미지를 깔고 그 위에 스크림을 덮습니다.
+   글자가 사진 어디에 걸리든 읽히도록 왼쪽을 짙게 하는 방향 그라데이션을 씁니다.
+   사진 위는 라이트 · 다크와 무관하게 늘 어두운 면이라 글자색을 고정합니다. */
+.banner--photo {
+  background: var(--bg-subtle);
+  border-color: transparent;
+}
+.banner--photo > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+/* 스크림은 배너의 마지막 자식이라 화살표 · 인디케이터보다 나중에 그려집니다.
+   pointer-events 를 꺼 두지 않으면 그 위에 얹힌 화살표가 호버도 클릭도 받지 못합니다. */
+.banner--photo::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(100deg, rgba(17, 17, 17, 0.82), rgba(17, 17, 17, 0.18));
+}
+/* 스크림 위로 올린다 — 본문은 흐름 안이라 relative, 화살표 · 인디케이터는 이미 absolute */
+.banner--photo .banner__body { position: relative; z-index: 1; }
+.banner--photo .banner__nav,
+.banner--photo .banner__dots { z-index: 1; }
+.banner--photo .t-title { color: var(--color-gray-0); }
+.banner--photo .t-sm    { color: rgba(255, 255, 255, 0.72); }
+.banner--photo .banner__dot { background: var(--border-btn-overlay); }
+.banner--photo .banner__dot.is-active { background: var(--color-brand); }
+
 .banner__nav {
   position: absolute;
   top: 50%;
@@ -2326,7 +2352,7 @@ code.is-brand { color: var(--color-brand-700); background: var(--color-brand-50)
    md(24) 그대로면 gap 8 을 더해 32px 이 되어 조금 멉니다 — 한 칸 당겨 28px 로 둡니다. */
 .appbar__user .btn { margin-left: calc(var(--spacing-md) - var(--spacing-3xs)); }
 
-.hero__actions { margin-top: var(--spacing-md); }
+.hero__actions { display: flex; flex-wrap: wrap; gap: var(--spacing-2xs); margin-top: var(--spacing-md); }
 
 /* --------------------------------------------------------------------------
    미디어 아이콘 버튼 — 썸네일 위에 얹는 좋아요 · 저장
@@ -2742,6 +2768,7 @@ code.is-brand { color: var(--color-brand-700); background: var(--color-brand-50)
             </dl>
             <div class="hero__actions">
               <a class="btn btn--outline btn--sm" href="../samples/home.html">홈 시안 바로가기 <span class="icon icon--sm icon--after">chevron_right</span></a>
+              <a class="btn btn--outline btn--sm" href="../samples/elearning.html">이러닝 시안 바로가기 <span class="icon icon--sm icon--after">chevron_right</span></a>
             </div>
           </div>
         </section>
@@ -4238,6 +4265,7 @@ code.is-brand { color: var(--color-brand-700); background: var(--color-brand-50)
               <span class="card__hint">출처 · 이러닝 개선안 (banners · lawPoints)</span>
             </div>
             <div class="preview">
+              <p class="preview__label">기본 <span>· 사진을 까는 자리에는 <code>.banner--photo</code> 를 더합니다 — 이미지 위에 스크림을 덮고 글자색 · 화살표 · 인디케이터를 미디어용으로 바꿉니다 (<code>samples/elearning.html</code> 참고)</span></p>
               <div class="banner" data-single>
                 <span class="banner__nav banner__nav--prev is-arrow" data-dir="prev"><span class="icon">chevron_left</span></span>
                 <span class="banner__nav banner__nav--next is-arrow" data-dir="next"><span class="icon">chevron_right</span></span>

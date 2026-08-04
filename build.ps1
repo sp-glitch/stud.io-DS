@@ -32,7 +32,7 @@ $html = $html -replace '(?m)^\s*<link rel="stylesheet" href="assets/css/style\.c
 $html = $html -replace '(?m)^\s*<script src="assets/js/script\.js"></script>\s*$',            ("<script>`n" + $js.Replace('$','$$')  + "`n</script>")
 
 # 홈 시안 링크 — dist/ 안에서 열리므로 한 단계 위로 올려 준다
-$html = $html.Replace('href="samples/home.html"', 'href="../samples/home.html"')
+foreach ($s in @('home.html','elearning.html')) { $html = $html.Replace('href="samples/' + $s + '"', 'href="../samples/' + $s + '"') }
 
 # 이미지 인라인 — 경로가 긴 것부터 치환해야 짧은 경로에 잡아먹히지 않습니다
 $images = @(
