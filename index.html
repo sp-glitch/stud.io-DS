@@ -90,6 +90,7 @@
         <a class="nav__link" href="#header-footer"><span class="icon">web_asset</span>헤더 · 푸터</a>
         <a class="nav__link" href="#main-banner"><span class="icon">wallpaper</span>메인 배너</a>
         <a class="nav__link" href="#live-bar"><span class="icon">live_tv</span>라이브 콘텐츠 바</a>
+        <a class="nav__link" href="#notice-list"><span class="icon">campaign</span>공지사항 목록</a>
       </div>
       <div class="nav__group">
         <p class="nav__category">모달 · 오버레이</p>
@@ -1600,7 +1601,7 @@
                 </div>
               </div>
               <div class="preview__divider">
-                <p class="preview__label">하단 고정 <span>· 광고 카드는 <code>.spec--ad</code> — 스펙과 달리 문안(label)이 주인공이라 label · value 의 밝기와 굵기를 맞바꿉니다</span></p>
+                <p class="preview__label">하단 고정 <span>· 광고 카드는 <code>.spec--ad</code> — 스펙과 달리 문안(label)이 주인공이라 label · value 의 밝기와 굵기를 맞바꿉니다. 눌러서 들어가는 카드라 <code>.adcard</code> · <code>.adstrip</code> 과 같은 규칙으로 손 모양 + 테두리 강조가 붙습니다</span></p>
                 <div class="spec spec--ad" style="max-width:240px">
                   <span class="tag tag--neutral">AD</span>
                   <p class="spec__label">지식 재산을 보호하는 특허 전문 서비스</p>
@@ -1636,7 +1637,7 @@
             </div>
             <div class="preview">
               <div class="preview__group">
-                <p class="preview__label">헤더 <span>· 실제 화면에서는 <code>.appbar</code> 로 최상단에 고정합니다 — 높이 <code>--appbar-h</code> 88px, 안쪽 폭은 <code>--layout-max</code> 1600px 로 사이드바 · 본문과 함께 가운데 정렬</span></p>
+                <p class="preview__label">헤더 <span>· 실제 화면에서는 <code>.appbar</code> 로 최상단에 고정합니다 — 높이 <code>--appbar-h</code> 68px, 안쪽 폭은 <code>--layout-max</code> 1600px 로 사이드바 · 본문과 함께 가운데 정렬</span></p>
                 <div class="appbar-demo">
                   <span class="t-body-strong">홈</span>
                   <span class="appbar-demo__user">
@@ -1748,6 +1749,31 @@
           </div>
         </section>
 
+        <!-- ==================== 공지사항 목록 ==================== -->
+        <section class="section" id="notice-list">
+          <div class="section__head">
+            <p class="eyebrow">레이아웃</p>
+            <h2 class="section__title">공지사항 목록</h2>
+          </div>
+          <div class="card">
+            <div class="card__head">
+              <span class="live"><span class="live__dot"></span>LIVE PREVIEW</span>
+              <span class="card__hint">출처 · 홈 개선안 (notices)</span>
+            </div>
+            <div class="preview">
+              <div class="preview__group">
+                <p class="preview__label">기본 <span>· 한 줄에 하나씩. 왼쪽 순번은 <code>.notice-list--numbered</code> 가 <code>counter</code> 로 세고, 태그 폭 54px 고정으로 제목의 시작선을 맞춥니다. 날짜는 <code>tabular-nums</code> 로 오른쪽 끝. <code>.notice-list--boxed</code> 로 감싸면 오른쪽 끝이 표의 날짜 열로 읽혀 제목과의 빈칸이 어색하지 않습니다. 줄 전체가 하나의 링크라 행을 통째로 호버시킵니다</span></p>
+                <div class="notice-list notice-list--boxed notice-list--numbered">
+                  <div class="notice-row"><span class="tag tag--neutral">공지</span><span class="notice-row__text">2026 5대 법정의무교육 OPEN — 회원사 무료 수강 안내</span><span class="notice-row__date">07.01</span></div>
+                  <div class="notice-row"><span class="tag tag--neutral">공지</span><span class="notice-row__text">KMA 회원사 혜택, 파트너십 &amp; 제휴서비스 안내</span><span class="notice-row__date">06.28</span></div>
+                  <div class="notice-row"><span class="tag tag--neutral">공지</span><span class="notice-row__text">7월의 stud.io 큐레이션: 고객의 재설계</span><span class="notice-row__date">06.27</span></div>
+                  <div class="notice-row"><span class="tag tag--neutral">AD</span><span class="notice-row__text">스마트빌 · 글로싸인 제휴 EVENT — 회원사 특가</span><span class="notice-row__date"></span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         <!-- ==================== 모달 포탈 ==================== -->
         <section class="section" id="modal-portal">
           <div class="section__head">
@@ -1822,6 +1848,27 @@
                   <p class="t-body-strong">관계의 그린라이트를 켜는 DISC part 1</p>
                   <div class="vcard__speaker"><span class="avatar avatar--xs"></span><span class="vcard__name">오경임 강사</span></div>
                   <span class="vcard__date">2026-06-11</span>
+                </div>
+              </div>
+              <div class="preview__divider">
+                <p class="preview__label">썸네일 위 아이콘 버튼 <span>· 카드 호버에서 나타납니다. 우상단 좋아요 · 저장은 32px, 정중앙 재생은 <code>.mediabtn--lg</code> 48px. 켜짐 상태는 <code>aria-pressed="true"</code> 로 민트 채움. 버튼을 직접 가리키면 채움이 진해지고 테두리 · 글리프가 민트로 바뀝니다 — <code>.btn--overlay</code> 와 같은 규칙입니다</span></p>
+                <div class="onmedia onmedia--row">
+                  <button class="mediabtn" type="button" aria-pressed="false" aria-label="좋아요" data-toast="좋아요"><span class="icon">favorite</span></button>
+                  <button class="mediabtn" type="button" aria-pressed="true" aria-label="좋아요 켜짐" data-toast="좋아요 해제"><span class="icon">favorite</span></button>
+                  <button class="mediabtn" type="button" aria-pressed="false" aria-label="저장" data-toast="저장"><span class="icon">bookmark</span></button>
+                  <button class="mediabtn mediabtn--lg" type="button" aria-label="재생" data-toast="재생"><span class="icon">play_arrow</span></button>
+                </div>
+              </div>
+              <div class="preview__divider">
+                <p class="preview__label">썸네일 정중앙 자리 <span>· 왼쪽 <code>.thumb__scrim</code> 은 가리키면 배경이 어두워지며 재생 버튼이 나타납니다. 오른쪽 <code>.thumb__center</code> 는 덮지 않고 버튼만 늘 보여 주며 반응은 버튼 자신의 호버가 맡습니다 — 이미지 확대로 반응하는 카드에 씁니다. <strong>가리켜 보세요</strong></span></p>
+                <div class="grid grid--demo">
+                  <div class="thumb thumb--wide">
+                    <span class="tag tag--dark thumb__br">18:32</span>
+                    <div class="thumb__scrim"><button class="mediabtn mediabtn--lg" type="button" aria-label="재생" data-toast="재생"><span class="icon">play_arrow</span></button></div>
+                  </div>
+                  <div class="thumb thumb--tall">
+                    <div class="thumb__center"><button class="mediabtn mediabtn--lg" type="button" aria-label="재생" data-toast="재생"><span class="icon">play_arrow</span></button></div>
+                  </div>
                 </div>
               </div>
             </div>

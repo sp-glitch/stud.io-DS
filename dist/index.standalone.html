@@ -166,8 +166,11 @@
      테마 토큰이 아니라 고정값을 둡니다 */
   --fill-scrim-media:       rgba(17, 17, 17, 0.66);   /* 썸네일 위 스크림 — .btn--overlay 와 한 쌍 */
 
-  --fill-btn-overlay:       rgba(28, 28, 28, 0.92);
-  --fill-btn-overlay-hover: rgba(36, 36, 36, 0.96);
+  /* 거의 불투명하면 사진 위에 검은 딱지처럼 앉습니다 — 뒤 이미지가 비치도록 낮춥니다.
+     글리프(흰 88%)와 테두리가 형태를 잡아 주므로 이 정도로도 또렷하게 읽힙니다.
+     호버는 다른 곳과 같이 '더 진해지는' 방향입니다. */
+  --fill-btn-overlay:       rgba(28, 28, 28, 0.62);
+  --fill-btn-overlay-hover: rgba(28, 28, 28, 0.78);
   --border-btn-overlay:     rgba(255, 255, 255, 0.26);
   --text-btn-overlay:       rgba(255, 255, 255, 0.88);
 
@@ -228,7 +231,7 @@
   --space-meta-action: 12px;   /* 메타 ↔ 버튼 */
 
   /* 서비스 화면 골격 */
-  --appbar-h:     82px;    /* 최상단 고정 헤더 높이 */
+  --appbar-h:     68px;    /* 최상단 고정 헤더 높이 — 로고(26px)와 상하 여백 xs+ 두 칸 */
   --layout-max: 1600px;    /* 헤더 · 사이드바 · 본문을 함께 가운데로 모으는 최대 폭 */
 
   --spacing-3xs:   4px;
@@ -702,7 +705,10 @@ button {
 
 /* 마지막 섹션도 화면 맨 위까지 올라올 수 있도록 남기는 여유.
    이게 없으면 하단 메뉴를 눌러도 해당 섹션이 상단에 닿지 못해
-   스크롤 스파이가 엉뚱한 섹션을 활성으로 잡습니다. */
+   스크롤 스파이가 엉뚱한 섹션을 활성으로 잡습니다.
+   ⚠ .page 와 .hero 는 '이 문서 페이지'의 레이아웃이지 컴포넌트가 아닙니다.
+      이 스타일시트를 가져다 쓰는 화면에서 같은 이름을 쓰면 45vh 꼬리와
+      flex 배치가 그대로 딸려 갑니다 — 다른 이름을 쓰세요. */
 .page::after { content: ''; display: block; flex: none; height: 45vh; }
 
 .overlay { display: none; position: fixed; inset: 0; z-index: 30; background: rgba(17, 17, 17, 0.32); }
@@ -1120,6 +1126,13 @@ code.is-brand { color: var(--color-brand-700); background: var(--color-brand-50)
   font-weight: var(--font-weight-medium);
   color: var(--text-eyebrow);
 }
+/* 광고는 언제나 눌러서 들어가는 카드입니다 — 다른 광고 배치(.adcard · .adstrip)와 같은
+   규칙으로 손 모양 + 테두리 강조를 주어 "선택할 수 있다"를 드러냅니다. */
+.spec--ad {
+  cursor: pointer;
+  transition: border-color var(--duration-hover), background var(--duration-hover);
+}
+.spec--ad:hover { border-color: var(--border-strong); background: var(--bg-hover); }
 
 
 /* ==========================================================================
@@ -1738,10 +1751,61 @@ code.is-brand { color: var(--color-brand-700); background: var(--color-brand-50)
   flex-direction: column;
   gap: var(--spacing-3xs);
   padding: var(--spacing-lg) var(--spacing-xs) var(--spacing-xs);
-  background: linear-gradient(transparent, rgba(17, 17, 17, 0.82));
+  /* 아래쪽은 거의 불투명하게 — 밝은 썸네일에서 흰 글자가 묻히지 않게 합니다.
+     중간에 정거장을 하나 두어 위로는 부드럽게, 글자 뒤로는 짙게 깔립니다. */
+  background: linear-gradient(rgba(17, 17, 17, 0), rgba(17, 17, 17, 0.78) 42%, rgba(17, 17, 17, 0.95));
 }
+
+/* 나타나는 하단 밴드 — 평상시엔 숨어 있다가 썸네일을 가리키면 아래에서 올라옵니다.
+   설명처럼 뒤늦게 보여 줄 글을 카드 밖으로 내보내지 않고 썸네일 안에서 해결하기 위한 자리입니다.
+   카드 바깥으로 판을 늘리면 카드가 담긴 상자(패널)를 뚫고 나가 어색해집니다.
+   트리거는 .thumb__scrim 과 같아 한 카드 안에서 따로 놀지 않습니다. */
+.thumb__foot--reveal {
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity var(--duration-hover) var(--ease-out), transform var(--duration-hover) var(--ease-out);
+}
+.thumb:hover .thumb__foot--reveal,
+.thumb:focus-within .thumb__foot--reveal { opacity: 1; transform: translateY(0); }
+
+/* 밴드가 올라오는 동안에는 우하단 배지(재생시간 등)와 자리가 겹칩니다 — 배지가 자리를 내줍니다.
+   재생시간은 평상시에 이미 읽었고, 지금 읽어야 할 것은 설명입니다.
+   밴드를 배지보다 앞에 두는 마크업에서만 걸립니다. */
+.thumb__foot--reveal ~ .thumb__br { transition: opacity var(--duration-hover) var(--ease-out); }
+.thumb:hover .thumb__foot--reveal ~ .thumb__br,
+.thumb:focus-within .thumb__foot--reveal ~ .thumb__br { opacity: 0; }
 .thumb__foot-title { font-size: var(--font-size-caption); font-weight: var(--font-weight-bold); line-height: var(--line-height-snug); color: var(--color-gray-0); }
 .thumb__progress { position: absolute; right: 0; bottom: 0; left: 0; height: 4px; background: rgba(255, 255, 255, 0.4); }
+
+/* 썸네일 정중앙 자리 — 재생 버튼처럼 가운데 하나만 놓이는 조작을 위한 칸입니다.
+   칸 자체는 클릭을 가로채지 않고 안에 놓인 것만 받습니다.
+   .thumb__center 는 늘 보이고, .thumb__scrim 은 여기에 '어둡게 덮기 + 호버해야 나타남'을 더한 변형입니다.
+   이미지 확대로 반응하는 카드는 앞의 것을, 배경이 어두워지는 카드는 뒤의 것을 씁니다. */
+.thumb__center,
+.thumb__scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+}
+.thumb__center { pointer-events: none; }
+.thumb__center > * { pointer-events: auto; }
+
+.thumb__scrim {
+  background: var(--fill-scrim-media);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--duration-hover) var(--ease-out);
+}
+.thumb:hover .thumb__scrim,
+.thumb:focus-within .thumb__scrim { opacity: 1; pointer-events: auto; }
+
+/* 스크림 안의 재생 버튼은 스크림보다 살짝 늦게, 확대되며 들어옵니다.
+   정중앙에서는 위로 뜨는 움직임이 어색해 확대만 씁니다. */
+.thumb__scrim .mediabtn { transform: scale(.94); transition: transform var(--duration-hover) var(--ease-out), background var(--duration-hover), box-shadow var(--duration-hover), color var(--duration-hover); }
+.thumb:hover .thumb__scrim .mediabtn,
+.thumb:focus-within .thumb__scrim .mediabtn { transform: scale(1); transition-delay: 40ms; }
 .thumb__progress > span { display: block; height: 100%; background: var(--fill-brand); }
 
 /* 아바타 ------------------------------------------------------------------ */
@@ -2249,18 +2313,18 @@ code.is-brand { color: var(--color-brand-700); background: var(--color-brand-50)
   height: 100%;
   max-width: var(--layout-max);
   margin-inline: auto;
-  /* 왼쪽 여백은 사이드바 콘텐츠가 시작하는 위치(패딩 16 + 링크 패딩 8)에 맞춘다 */
-  padding: 0 var(--spacing-lg) 0 var(--spacing-md);
+  /* 왼쪽 여백은 사이드바 안쪽 블록이 시작하는 위치 — 메뉴 알약(호버 배경)의 왼쪽 선에 맞춘다 */
+  padding: 0 var(--spacing-lg) 0 var(--spacing-sm);
 }
 .appbar__logo { flex: none; display: flex; align-items: center; }
-.appbar__logo img { display: block; width: auto; height: 24px; }
+.appbar__logo img { display: block; width: auto; height: 26px; }
 .appbar__here { font-size: var(--font-size-subhead); font-weight: var(--font-weight-semibold); color: var(--text-heading); }
 .appbar__user { margin-left: auto; display: flex; align-items: center; gap: var(--spacing-2xs); font-size: var(--font-size-caption); color: var(--text-secondary); }
 .appbar__user strong { font-weight: var(--font-weight-bold); color: var(--text-brand); }
 /* 인사말과 동작 버튼은 성격이 달라 gap 만으로는 붙어 보입니다 — 버튼 앞만 두 단계 더 띄웁니다.
    텍스트 버튼은 좌우 패딩이 0 이라 여백을 margin 이 전부 감당합니다.
-   md(24) 그대로면 gap 8 을 더해 32px 이 되어 조금 멀어, 최소 단위의 절반만 당겨 30px 로 둡니다. */
-.appbar__user .btn { margin-left: calc(var(--spacing-md) - var(--spacing-3xs) / 2); }
+   md(24) 그대로면 gap 8 을 더해 32px 이 되어 조금 멉니다 — 한 칸 당겨 28px 로 둡니다. */
+.appbar__user .btn { margin-left: calc(var(--spacing-md) - var(--spacing-3xs)); }
 
 .hero__actions { margin-top: var(--spacing-md); }
 
@@ -2274,22 +2338,100 @@ code.is-brand { color: var(--color-brand-700); background: var(--color-brand-50)
 .mediabtn {
   display: grid;
   place-items: center;
-  width: 32px;                       /* --banner-nav-size 의 축소값 */
-  height: 32px;
+  width: var(--mediabtn-size);
+  height: var(--mediabtn-size);
+  --mediabtn-size: 32px;             /* --banner-nav-size 의 축소값 */
   padding: 0;
   border: 0;
   border-radius: var(--radius-full);
   background: var(--fill-btn-overlay);
-  box-shadow: 0 0 0 var(--border-width) var(--border-btn-overlay);
+  /* 링 + 부드러운 그림자 — 밝은 썸네일 위에서도 원형이 끊기지 않고 읽힙니다 */
+  box-shadow: 0 0 0 var(--border-width) var(--border-btn-overlay), var(--shadow-hover);
   color: var(--text-btn-overlay);
   cursor: pointer;
   --icon-size: 16px;
   transition: background var(--duration-hover), box-shadow var(--duration-hover), color var(--duration-hover);
 }
-.mediabtn:hover { background: var(--fill-btn-overlay-hover); box-shadow: 0 0 0 var(--border-width) var(--border-strong); }
+/* 호버 — .btn--overlay 와 같은 규칙: 채움이 진해지고 테두리 · 글리프가 민트가 됩니다 */
+.mediabtn:hover { background: var(--fill-btn-overlay-hover); box-shadow: 0 0 0 var(--border-width) var(--color-brand), var(--shadow-hover); color: var(--color-brand); }
 .mediabtn:focus-visible { outline: 2px solid var(--border-brand); outline-offset: 2px; }
 /* 켜짐 — 민트는 채움, 그 위 아이콘은 Ink */
 .mediabtn[aria-pressed="true"] { background: var(--fill-brand); color: var(--text-on-brand); --icon-fill: 1; }
+
+/* 큰 원형 — 썸네일 정중앙의 재생 버튼.
+   우상단 좋아요 · 저장과 같은 계열이지만 '이 카드를 연다'는 주 동작이라
+   배너 화살표(.banner__nav--lg)와 같은 48px 을 쓰고 글리프는 채웁니다.
+   글자 버튼 대신 이 아이콘을 쓰면 카드 4종이 같은 폭 · 같은 무게로 통일됩니다. */
+.mediabtn--lg { --mediabtn-size: 48px; --icon-size: var(--icon-size-lg); --icon-fill: 1; }
+
+/* 미디어 위 버튼을 가로로 늘어놓는 문서 전용 받침 */
+.onmedia--row { grid-auto-flow: column; gap: var(--spacing-md); }
+
+/* --------------------------------------------------------------------------
+   공지사항 목록 — 순번 · 태그 · 제목 · 날짜가 한 줄에 하나씩.
+   한 줄이 곧 하나의 링크라 줄 전체를 호버시키고, 줄 사이는 선으로 나눕니다.
+   태그 폭을 고정해 제목의 시작선을 맞추고 날짜는 오른쪽 끝에 세로로 세웁니다.
+   본문 폭이 넓으면 제목과 날짜 사이가 비는데, 이는 상자(.notice-list--boxed)가
+   받아 줍니다 — 테두리 안의 오른쪽 끝은 '표의 날짜 열'로 읽혀 빈칸이 어색하지 않습니다.
+   -------------------------------------------------------------------------- */
+.notice-list { display: flex; flex-direction: column; }
+
+/* 상자 — 목록을 테두리로 감싸 본문의 다른 블록과 확실히 구분합니다 */
+.notice-list--boxed {
+  padding-inline: var(--spacing-sm);
+  background: var(--bg-surface);
+  border: var(--border-width) solid var(--border-default);
+  border-radius: var(--radius-md);
+}
+
+/* 순번 — 왼쪽 끝에 1. 2. 3. 을 세워 줄이 어디서 시작하는지 잡아 줍니다.
+   번호를 손으로 적지 않고 counter 로 세어 순서가 어긋날 일이 없습니다. */
+.notice-list--numbered { counter-reset: notice; }
+.notice-list--numbered .notice-row { counter-increment: notice; }
+.notice-list--numbered .notice-row::before {
+  content: counter(notice) ".";
+  flex: none;
+  width: 16px;
+  font-variant-numeric: tabular-nums;
+  font-size: var(--font-size-caption);
+  color: var(--text-eyebrow);
+}
+
+.notice-row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-xs) var(--spacing-2xs);
+  cursor: pointer;
+  transition: background var(--duration-hover);
+}
+.notice-row + .notice-row { border-top: var(--border-width) solid var(--border-subtle); }
+.notice-row:hover { background: var(--bg-hover); }
+
+/* 태그 폭 고정 — 글자 수가 달라도 제목이 언제나 같은 x 에서 시작합니다 */
+.notice-row .tag { flex: none; width: 54px; }
+
+.notice-row__text {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--font-size-caption);
+  color: var(--text-secondary);      /* 표식(태그)보다 본문이 밝아야 먼저 읽힙니다 */
+  transition: color var(--duration-hover);
+}
+.notice-row:hover .notice-row__text { color: var(--text-heading); }
+
+/* 날짜가 없는 줄(AD 등)에도 자리를 남겨 제목의 끝선이 흔들리지 않게 합니다 */
+.notice-row__date {
+  flex: none;
+  min-width: var(--spacing-xl);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-size: var(--font-size-caption);
+  color: var(--text-eyebrow);
+}
 
 .appbar-demo { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--spacing-xs); width: 100%; padding: var(--spacing-sm) var(--spacing-md); background: var(--bg-surface); border: var(--border-width) solid var(--border-default); border-radius: var(--radius-lg); }
 .appbar-demo__user { display: flex; align-items: center; gap: var(--spacing-2xs); font-size: var(--font-size-caption); color: var(--text-secondary); }
@@ -2494,6 +2636,7 @@ code.is-brand { color: var(--color-brand-700); background: var(--color-brand-50)
         <a class="nav__link" href="#header-footer"><span class="icon">web_asset</span>헤더 · 푸터</a>
         <a class="nav__link" href="#main-banner"><span class="icon">wallpaper</span>메인 배너</a>
         <a class="nav__link" href="#live-bar"><span class="icon">live_tv</span>라이브 콘텐츠 바</a>
+        <a class="nav__link" href="#notice-list"><span class="icon">campaign</span>공지사항 목록</a>
       </div>
       <div class="nav__group">
         <p class="nav__category">모달 · 오버레이</p>
@@ -4004,7 +4147,7 @@ code.is-brand { color: var(--color-brand-700); background: var(--color-brand-50)
                 </div>
               </div>
               <div class="preview__divider">
-                <p class="preview__label">하단 고정 <span>· 광고 카드는 <code>.spec--ad</code> — 스펙과 달리 문안(label)이 주인공이라 label · value 의 밝기와 굵기를 맞바꿉니다</span></p>
+                <p class="preview__label">하단 고정 <span>· 광고 카드는 <code>.spec--ad</code> — 스펙과 달리 문안(label)이 주인공이라 label · value 의 밝기와 굵기를 맞바꿉니다. 눌러서 들어가는 카드라 <code>.adcard</code> · <code>.adstrip</code> 과 같은 규칙으로 손 모양 + 테두리 강조가 붙습니다</span></p>
                 <div class="spec spec--ad" style="max-width:240px">
                   <span class="tag tag--neutral">AD</span>
                   <p class="spec__label">지식 재산을 보호하는 특허 전문 서비스</p>
@@ -4040,7 +4183,7 @@ code.is-brand { color: var(--color-brand-700); background: var(--color-brand-50)
             </div>
             <div class="preview">
               <div class="preview__group">
-                <p class="preview__label">헤더 <span>· 실제 화면에서는 <code>.appbar</code> 로 최상단에 고정합니다 — 높이 <code>--appbar-h</code> 88px, 안쪽 폭은 <code>--layout-max</code> 1600px 로 사이드바 · 본문과 함께 가운데 정렬</span></p>
+                <p class="preview__label">헤더 <span>· 실제 화면에서는 <code>.appbar</code> 로 최상단에 고정합니다 — 높이 <code>--appbar-h</code> 68px, 안쪽 폭은 <code>--layout-max</code> 1600px 로 사이드바 · 본문과 함께 가운데 정렬</span></p>
                 <div class="appbar-demo">
                   <span class="t-body-strong">홈</span>
                   <span class="appbar-demo__user">
@@ -4152,6 +4295,31 @@ code.is-brand { color: var(--color-brand-700); background: var(--color-brand-50)
           </div>
         </section>
 
+        <!-- ==================== 공지사항 목록 ==================== -->
+        <section class="section" id="notice-list">
+          <div class="section__head">
+            <p class="eyebrow">레이아웃</p>
+            <h2 class="section__title">공지사항 목록</h2>
+          </div>
+          <div class="card">
+            <div class="card__head">
+              <span class="live"><span class="live__dot"></span>LIVE PREVIEW</span>
+              <span class="card__hint">출처 · 홈 개선안 (notices)</span>
+            </div>
+            <div class="preview">
+              <div class="preview__group">
+                <p class="preview__label">기본 <span>· 한 줄에 하나씩. 왼쪽 순번은 <code>.notice-list--numbered</code> 가 <code>counter</code> 로 세고, 태그 폭 54px 고정으로 제목의 시작선을 맞춥니다. 날짜는 <code>tabular-nums</code> 로 오른쪽 끝. <code>.notice-list--boxed</code> 로 감싸면 오른쪽 끝이 표의 날짜 열로 읽혀 제목과의 빈칸이 어색하지 않습니다. 줄 전체가 하나의 링크라 행을 통째로 호버시킵니다</span></p>
+                <div class="notice-list notice-list--boxed notice-list--numbered">
+                  <div class="notice-row"><span class="tag tag--neutral">공지</span><span class="notice-row__text">2026 5대 법정의무교육 OPEN — 회원사 무료 수강 안내</span><span class="notice-row__date">07.01</span></div>
+                  <div class="notice-row"><span class="tag tag--neutral">공지</span><span class="notice-row__text">KMA 회원사 혜택, 파트너십 &amp; 제휴서비스 안내</span><span class="notice-row__date">06.28</span></div>
+                  <div class="notice-row"><span class="tag tag--neutral">공지</span><span class="notice-row__text">7월의 stud.io 큐레이션: 고객의 재설계</span><span class="notice-row__date">06.27</span></div>
+                  <div class="notice-row"><span class="tag tag--neutral">AD</span><span class="notice-row__text">스마트빌 · 글로싸인 제휴 EVENT — 회원사 특가</span><span class="notice-row__date"></span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         <!-- ==================== 모달 포탈 ==================== -->
         <section class="section" id="modal-portal">
           <div class="section__head">
@@ -4226,6 +4394,27 @@ code.is-brand { color: var(--color-brand-700); background: var(--color-brand-50)
                   <p class="t-body-strong">관계의 그린라이트를 켜는 DISC part 1</p>
                   <div class="vcard__speaker"><span class="avatar avatar--xs"></span><span class="vcard__name">오경임 강사</span></div>
                   <span class="vcard__date">2026-06-11</span>
+                </div>
+              </div>
+              <div class="preview__divider">
+                <p class="preview__label">썸네일 위 아이콘 버튼 <span>· 카드 호버에서 나타납니다. 우상단 좋아요 · 저장은 32px, 정중앙 재생은 <code>.mediabtn--lg</code> 48px. 켜짐 상태는 <code>aria-pressed="true"</code> 로 민트 채움. 버튼을 직접 가리키면 채움이 진해지고 테두리 · 글리프가 민트로 바뀝니다 — <code>.btn--overlay</code> 와 같은 규칙입니다</span></p>
+                <div class="onmedia onmedia--row">
+                  <button class="mediabtn" type="button" aria-pressed="false" aria-label="좋아요" data-toast="좋아요"><span class="icon">favorite</span></button>
+                  <button class="mediabtn" type="button" aria-pressed="true" aria-label="좋아요 켜짐" data-toast="좋아요 해제"><span class="icon">favorite</span></button>
+                  <button class="mediabtn" type="button" aria-pressed="false" aria-label="저장" data-toast="저장"><span class="icon">bookmark</span></button>
+                  <button class="mediabtn mediabtn--lg" type="button" aria-label="재생" data-toast="재생"><span class="icon">play_arrow</span></button>
+                </div>
+              </div>
+              <div class="preview__divider">
+                <p class="preview__label">썸네일 정중앙 자리 <span>· 왼쪽 <code>.thumb__scrim</code> 은 가리키면 배경이 어두워지며 재생 버튼이 나타납니다. 오른쪽 <code>.thumb__center</code> 는 덮지 않고 버튼만 늘 보여 주며 반응은 버튼 자신의 호버가 맡습니다 — 이미지 확대로 반응하는 카드에 씁니다. <strong>가리켜 보세요</strong></span></p>
+                <div class="grid grid--demo">
+                  <div class="thumb thumb--wide">
+                    <span class="tag tag--dark thumb__br">18:32</span>
+                    <div class="thumb__scrim"><button class="mediabtn mediabtn--lg" type="button" aria-label="재생" data-toast="재생"><span class="icon">play_arrow</span></button></div>
+                  </div>
+                  <div class="thumb thumb--tall">
+                    <div class="thumb__center"><button class="mediabtn mediabtn--lg" type="button" aria-label="재생" data-toast="재생"><span class="icon">play_arrow</span></button></div>
+                  </div>
                 </div>
               </div>
             </div>
