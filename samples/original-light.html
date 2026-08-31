@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="light">
+
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>stud.io (라이트) · 오리지널 (디자인 시스템 적용)</title>
+<link rel="icon" type="image/png" href="../assets/images/favicon.png">
+<link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="sample.css">
+<style>
+/* ============================================================
+   오리지널 — 이 화면에만 필요한 배치
+   컴포넌트는 전부 디자인 시스템 클래스이고, 여기서는 자리만 정한다.
+   ============================================================ */
+
+/* 디자인 시스템의 .vcard 는 격자에 줄지어 놓는 표준 카드라 max-width:300px 로 폭이 묶여 있다.
+   큰 신규 카드 · 가로형 카드는 그 상한만 풀어 쓴다 — 호버 · 여백 규칙은 그대로 물려받는다 */
+.feature,.topic,.stack__item{max-width:none}
+
+/* 신규 콘텐츠 + 인기 콘텐츠 — 홈의 .showcase-row 와 같은 1.62 : 1 비율을 쓴다.
+   두 상자가 같은 성격(둘러싼 패널)이라 높이를 맞춘다 */
+.newrow{display:grid;grid-template-columns:1.62fr minmax(0,1fr);gap:var(--spacing-md);align-items:stretch;margin-bottom:var(--spacing-md)}
+.pane{display:flex;flex-direction:column;gap:var(--spacing-xs);padding:var(--spacing-md);border:var(--border-width) solid var(--border-default);border-radius:var(--radius-lg);background:var(--bg-surface);box-sizing:border-box}
+.pane__title{font-size:var(--font-size-sm);font-weight:var(--font-weight-bold);color:var(--text-heading)}
+
+/* 큰 신규 카드 — 제목 아래 강사와 시청 버튼이 한 줄에서 양끝으로 갈린다 */
+.feature__foot{display:flex;align-items:center;justify-content:space-between;gap:var(--spacing-xs);margin-top:var(--spacing-3xs)}
+/* 강사 이름은 줄어들며 말줄임되고, 버튼은 절대 줄지 않는다 */
+.feature__foot .btn{flex:none}
+.feature__who{flex:1 1 auto;display:flex;align-items:center;gap:var(--spacing-2xs);min-width:0}
+.feature__name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:var(--font-size-caption);color:var(--text-tertiary)}
+
+/* 인기 콘텐츠 3개 — 썸네일이 조금 더 넓은 가로 배치.
+   패널 높이를 채우도록 위에서부터 고르게 벌린다 */
+.stack{flex:1;display:flex;flex-direction:column;justify-content:space-between;gap:var(--spacing-sm);min-height:0}
+.stack__item{display:grid;grid-template-columns:1.3fr minmax(0,1fr);gap:var(--spacing-sm);align-items:stretch}
+.stack__body{display:flex;flex-direction:column;justify-content:space-between;gap:var(--spacing-2xs);min-width:0}
+.stack__who{display:flex;align-items:center;gap:6px;min-width:0}
+.stack__name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:var(--font-size-caption);color:var(--text-tertiary)}
+
+/* 주제별 콘텐츠 — 썸네일이 왼쪽에 붙는 가로 카드 2열 */
+.topics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--spacing-md);margin-bottom:var(--spacing-2xl)}
+.topic{display:grid;grid-template-columns:300px minmax(0,1fr);gap:var(--spacing-sm);align-items:center}
+.topic__body{display:flex;flex-direction:column;gap:var(--spacing-3xs);min-width:0}
+
+/* 시리즈 레일 — 4열 카드 */
+.railgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--spacing-md)}
+
+/* 연사별 콘텐츠 — 사진 + 이름 + 소속 2열 */
+.speakers{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--spacing-sm)}
+.speaker{display:flex;align-items:center;gap:var(--spacing-sm);padding:var(--spacing-sm) var(--spacing-md);border:var(--border-width) solid var(--border-default);border-radius:var(--radius-md);background:var(--bg-surface);transition:border-color var(--duration-hover) var(--ease-out)}
+.speaker:hover{border-color:var(--border-brand)}
+.speaker__body{display:flex;flex-direction:column;gap:3px;min-width:0}
+.speaker__name{font-size:var(--font-size-sm);font-weight:var(--font-weight-semibold);color:var(--text-heading)}
+.speaker__role{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:var(--font-size-caption);color:var(--text-tertiary)}
+
+@media (max-width:1280px){
+  .railgrid{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media (max-width:1100px){
+  .newrow,.topics{grid-template-columns:minmax(0,1fr)}
+  .railgrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:680px){
+  .topic{grid-template-columns:140px minmax(0,1fr)}
+  .speakers{grid-template-columns:minmax(0,1fr)}
+}
+</style>
+</head>
+
+<body>
+
+<!-- ==================== 고정 헤더 (디자인 시스템 .appbar) ==================== -->
+<header class="appbar">
+  <div class="appbar__inner">
+    <a class="appbar__logo" href="home-light.html"><img src="../assets/images/logo/logo.png" alt="stud.io"></a>
+    <span class="appbar__user">
+      <span class="avatar avatar--sm"><img src="../assets/images/people/speaker-01.jpg" alt=""></span>
+      <span><strong>장예지</strong>님, 안녕하세요!</span>
+      <a class="btn btn--text" href="#">로그아웃</a>
+    </span>
+  </div>
+</header>
+
+<div class="shell">
+
+  <!-- ==================== 사이드바 ==================== -->
+  <aside class="snav">
+    <a class="snav__link" href="home-light.html"><span class="icon icon--sm">home</span>홈</a>
+    <a class="snav__link is-active" href="original-light.html"><span class="icon icon--sm">movie</span>오리지널</a>
+    <a class="snav__link" href="#"><span class="icon icon--sm">bolt</span>브리프</a>
+    <a class="snav__link" href="#"><span class="icon icon--sm">dynamic_feed</span>피드</a>
+    <a class="snav__link" href="elearning-light.html"><span class="icon icon--sm">school</span>이러닝</a>
+    <a class="snav__link" href="askhr-light.html"><span class="icon icon--sm">support_agent</span>ASK HR</a>
+    <a class="snav__link" href="#"><span class="icon icon--sm">sensors</span>라이브</a>
+    <div class="snav__rule"></div>
+    <a class="snav__link" href="#">검색</a>
+    <a class="snav__link" href="#">라이브러리</a>
+    <a class="snav__link" href="#">마이스튜디오</a>
+    <a class="snav__link" href="#">멤버십 보러가기</a>
+    <div class="snav__promo">
+      <div class="spec spec--ad">
+        <span class="tag tag--neutral">AD</span>
+        <p class="spec__label">지식 재산을 보호하는 특허 전문 서비스</p>
+        <p class="spec__value">INNOBANK</p>
+      </div>
+      <a class="btn btn--tint btn--sm btn--block snav__lxp" href="#">우리회사 LXP 바로가기</a>
+    </div>
+  </aside>
+
+  <!-- ==================== 본문 ==================== -->
+  <main class="mainpane">
+
+    <!-- ========== 시리즈 탭 ========== -->
+    <div class="chip-row" data-chip-group>
+      <span class="chip is-active">전체</span>
+      <span class="chip">최고경영자조찬회</span>
+      <span class="chip">리더스포럼</span>
+      <span class="chip">특별한클라스</span>
+      <span class="chip">스킬업클라스</span>
+    </div>
+
+    <!-- ========== 신규 콘텐츠 · 인기 콘텐츠 ========== -->
+    <div class="newrow">
+
+      <div class="pane">
+        <p class="pane__title">신규 콘텐츠</p>
+        <article class="vcard vcard--overlay feature">
+          <div class="thumb thumb--wide">
+            <img src="../assets/images/thumbnails/class-econ.jpg" alt="">
+            <div class="mediabtn-group">
+              <button class="mediabtn" type="button" aria-pressed="false" aria-label="좋아요"><span class="icon">favorite</span></button>
+              <button class="mediabtn" type="button" aria-pressed="false" aria-label="저장"><span class="icon">bookmark</span></button>
+            </div>
+            <div class="thumb__scrim"><a class="mediabtn mediabtn--lg" href="video-light.html" aria-label="R&amp;D 제대로 하기 재생"><span class="icon">play_arrow</span></a></div>
+            <span class="tag tag--dark thumb__br">48:12</span>
+          </div>
+          <span class="series series--gold">최고경영자조찬회</span>
+          <p class="t-subhead">R&amp;D 제대로 하기: 좋은 기술 vs 팔리는 기술</p>
+          <div class="feature__foot">
+            <span class="feature__who">
+              <span class="avatar avatar--sm"><img src="../assets/images/people/speaker-jang.jpg" alt=""></span>
+              <span class="feature__name">장혁 성균관대학교 성균에너지과학기술원 특임교수</span>
+            </span>
+            <a class="btn btn--primary" href="video-light.html"><span class="icon icon--sm icon--fill">play_arrow</span>시청하기</a>
+          </div>
+        </article>
+      </div>
+
+      <div class="pane">
+        <p class="pane__title">인기 콘텐츠</p>
+        <div class="stack">
+
+          <article class="vcard vcard--overlay stack__item">
+            <div class="thumb thumb--wide">
+              <img src="../assets/images/thumbnails/forum-217.jpg" alt="">
+              <div class="thumb__scrim"><a class="mediabtn" href="video-light.html" aria-label="제216회 멘탈 회복탄력성 재생"><span class="icon icon--sm">play_arrow</span></a></div>
+              <span class="tag tag--dark thumb__br">42:10</span>
+            </div>
+            <div class="stack__body">
+              <div>
+                <span class="series series--orange">리더스포럼</span>
+                <p class="t-body-strong clamp-2">제216회 | 멘탈 회복탄력성: 번아웃을 막는 '건강한 남 탓'의 미학</p>
+              </div>
+              <span class="stack__who">
+                <span class="avatar avatar--xs"><img src="../assets/images/people/speaker-01.jpg" alt=""></span>
+                <span class="stack__name">정일영 박사</span>
+              </span>
+            </div>
+          </article>
+
+          <article class="vcard vcard--overlay stack__item">
+            <div class="thumb thumb--wide">
+              <img src="../assets/images/thumbnails/class-econ.jpg" alt="">
+              <div class="thumb__scrim"><a class="mediabtn" href="video-light.html" aria-label="2026 하반기 경제전망 재생"><span class="icon icon--sm">play_arrow</span></a></div>
+              <span class="tag tag--dark thumb__br">38:24</span>
+            </div>
+            <div class="stack__body">
+              <div>
+                <span class="series series--green">특별한클라스</span>
+                <p class="t-body-strong clamp-2">2026 하반기 경제전망: 파동의 시대를 읽는 법</p>
+              </div>
+              <span class="stack__who">
+                <span class="avatar avatar--xs"><img src="../assets/images/people/speaker-01.jpg" alt=""></span>
+                <span class="stack__name">박상희 이코노미스트</span>
+              </span>
+            </div>
+          </article>
+
+          <article class="vcard vcard--overlay stack__item">
+            <div class="thumb thumb--wide">
+              <img src="../assets/images/thumbnails/ceo-634.jpg" alt="">
+              <div class="thumb__scrim"><a class="mediabtn" href="video-light.html" aria-label="제634회 초격차 경영 재생"><span class="icon icon--sm">play_arrow</span></a></div>
+              <span class="tag tag--dark thumb__br">52:40</span>
+            </div>
+            <div class="stack__body">
+              <div>
+                <span class="series series--gold">최고경영자조찬회</span>
+                <p class="t-body-strong clamp-2">제634회 | 초격차 경영</p>
+              </div>
+              <span class="stack__who">
+                <span class="avatar avatar--xs"><img src="../assets/images/people/speaker-01.jpg" alt=""></span>
+                <span class="stack__name">권오현 오렌지플래닛 창업재단 이사장</span>
+              </span>
+            </div>
+          </article>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== 라이브 바로가기 띠지 ========== -->
+    <a class="strip" href="#">
+      <span class="tag tag--fill">D-1</span>
+      <span class="t-label">LIVE 예정</span>
+      <span class="strip__title">제217회 리더스포럼 · 2026. 7. 10 (금) 오전 7:00</span>
+      <span class="btn btn--outline btn--sm strip__cta">라이브 바로가기<span class="icon icon--sm icon--after">chevron_right</span></span>
+    </a>
+
+    <!-- ========== 주제별 콘텐츠 보기 ========== -->
+    <div class="block">
+      <div class="block__head">
+        <div class="block__left">
+          <p class="block__title">주제별 콘텐츠 보기</p>
+          <p class="block__tip">관심 주제를 골라 한 번에 모아 보세요</p>
+        </div>
+      </div>
+      <div class="chip-row" data-chip-group>
+        <span class="chip is-active">경영 · 비즈니스</span>
+        <span class="chip">경제</span>
+        <span class="chip">AI · 인공지능</span>
+        <span class="chip">HR</span>
+      </div>
+    </div>
+
+    <div class="topics">
+      <article class="vcard vcard--overlay topic">
+        <div class="thumb thumb--wide">
+          <img src="../assets/images/thumbnails/ceo-634.jpg" alt="">
+          <div class="thumb__scrim"><a class="mediabtn mediabtn--lg" href="video-light.html" aria-label="제634회 초격차 경영 재생"><span class="icon">play_arrow</span></a></div>
+          <span class="tag tag--dark thumb__br">52:40</span>
+        </div>
+        <div class="topic__body">
+          <span class="series series--gold">최고경영자조찬회</span>
+          <p class="t-subhead">제634회 | 초격차 경영</p>
+          <span class="t-caption">권오현 오렌지플래닛 창업재단 이사장</span>
+        </div>
+      </article>
+
+      <article class="vcard vcard--overlay topic">
+        <div class="thumb thumb--wide">
+          <img src="../assets/images/thumbnails/forum-217.jpg" alt="">
+          <div class="thumb__scrim"><a class="mediabtn mediabtn--lg" href="video-light.html" aria-label="제216회 멘탈 회복탄력성 재생"><span class="icon">play_arrow</span></a></div>
+          <span class="tag tag--dark thumb__br">42:10</span>
+        </div>
+        <div class="topic__body">
+          <span class="series series--orange">리더스포럼</span>
+          <p class="t-subhead">제216회 | 멘탈 회복탄력성</p>
+          <span class="t-caption">정일영 박사</span>
+        </div>
+      </article>
+    </div>
+
+    <!-- ========== 시리즈 레일 ========== -->
+    <div class="block">
+      <div class="block__head">
+        <div class="block__left">
+          <p class="block__title">최고경영자조찬회</p>
+          <p class="block__tip">국내 최장수 CEO 조찬 강연 — 매월 각계 리더가 전하는 경영 통찰</p>
+        </div>
+        <a class="btn btn--text" href="#">전체보기<span class="icon icon--sm icon--after">chevron_right</span></a>
+      </div>
+      <div class="railgrid">
+
+        <article class="vcard vcard--overlay">
+          <div class="thumb thumb--wide">
+            <img src="../assets/images/thumbnails/ceo-634.jpg" alt="">
+            <div class="mediabtn-group">
+              <button class="mediabtn" type="button" aria-pressed="false" aria-label="좋아요"><span class="icon">favorite</span></button>
+              <button class="mediabtn" type="button" aria-pressed="false" aria-label="저장"><span class="icon">bookmark</span></button>
+            </div>
+            <div class="thumb__scrim"><a class="mediabtn mediabtn--lg" href="video-light.html" aria-label="제634회 초격차 경영 재생"><span class="icon">play_arrow</span></a></div>
+            <span class="tag tag--dark thumb__br">52:40</span>
+          </div>
+          <span class="series series--gold">최고경영자조찬회</span>
+          <p class="t-body-strong clamp-2">제634회 | 초격차 경영</p>
+          <div class="vcard__speaker"><span class="avatar avatar--xs"><img src="../assets/images/people/speaker-01.jpg" alt=""></span><span class="vcard__name">권오현 오렌지플래닛 창업재단 이사장</span></div>
+          <span class="vcard__date">2026-07-10</span>
+        </article>
+
+        <article class="vcard vcard--overlay">
+          <div class="thumb thumb--wide">
+            <img src="../assets/images/thumbnails/class-econ.jpg" alt="">
+            <div class="mediabtn-group">
+              <button class="mediabtn" type="button" aria-pressed="false" aria-label="좋아요"><span class="icon">favorite</span></button>
+              <button class="mediabtn" type="button" aria-pressed="false" aria-label="저장"><span class="icon">bookmark</span></button>
+            </div>
+            <div class="thumb__scrim"><a class="mediabtn mediabtn--lg" href="video-light.html" aria-label="제633회 제56회 한국의 경영자상 특별대담 재생"><span class="icon">play_arrow</span></a></div>
+            <span class="tag tag--dark thumb__br">55:03</span>
+          </div>
+          <span class="series series--gold">최고경영자조찬회</span>
+          <p class="t-body-strong clamp-2">제633회 | 제56회 한국의 경영자상 특별대담</p>
+          <div class="vcard__speaker"><span class="avatar avatar--xs"><img src="../assets/images/people/speaker-01.jpg" alt=""></span><span class="vcard__name">곽재선 KG그룹 회장</span></div>
+          <span class="vcard__date">2026-06-28</span>
+        </article>
+
+        <article class="vcard vcard--overlay">
+          <div class="thumb thumb--wide">
+            <img src="../assets/images/thumbnails/brief-ai.jpg" alt="">
+            <div class="mediabtn-group">
+              <button class="mediabtn" type="button" aria-pressed="false" aria-label="좋아요"><span class="icon">favorite</span></button>
+              <button class="mediabtn" type="button" aria-pressed="false" aria-label="저장"><span class="icon">bookmark</span></button>
+            </div>
+            <div class="thumb__scrim"><a class="mediabtn mediabtn--lg" href="video-light.html" aria-label="제628회 글로벌 AI 전력 수요 전망 및 대책 재생"><span class="icon">play_arrow</span></a></div>
+            <span class="tag tag--dark thumb__br">46:11</span>
+          </div>
+          <span class="series series--gold">최고경영자조찬회</span>
+          <p class="t-body-strong clamp-2">제628회 | 글로벌 AI 전력 수요 전망 및 대책</p>
+          <div class="vcard__speaker"><span class="avatar avatar--xs"><img src="../assets/images/people/speaker-01.jpg" alt=""></span><span class="vcard__name">우태희 효성중공업 대표이사</span></div>
+          <span class="vcard__date">2026-06-12</span>
+        </article>
+
+        <article class="vcard vcard--overlay">
+          <div class="thumb thumb--wide">
+            <img src="../assets/images/thumbnails/tip-202607.jpg" alt="">
+            <div class="mediabtn-group">
+              <button class="mediabtn" type="button" aria-pressed="false" aria-label="좋아요"><span class="icon">favorite</span></button>
+              <button class="mediabtn" type="button" aria-pressed="false" aria-label="저장"><span class="icon">bookmark</span></button>
+            </div>
+            <div class="thumb__scrim"><a class="mediabtn mediabtn--lg" href="video-light.html" aria-label="제616회 모든 경영자는 경험자다 재생"><span class="icon">play_arrow</span></a></div>
+            <span class="tag tag--dark thumb__br">51:20</span>
+          </div>
+          <span class="series series--gold">최고경영자조찬회</span>
+          <p class="t-body-strong clamp-2">제616회 | 모든 경영자는 경험자다</p>
+          <div class="vcard__speaker"><span class="avatar avatar--xs"><img src="../assets/images/people/speaker-01.jpg" alt=""></span><span class="vcard__name">차경진 한양대학교 교수</span></div>
+          <span class="vcard__date">2026-05-30</span>
+        </article>
+
+      </div>
+    </div>
+
+    <div class="block">
+      <div class="block__head">
+        <div class="block__left">
+          <p class="block__title">리더스포럼</p>
+          <p class="block__tip">리더를 위한 통찰 포럼 — 조직 · 사람 · 전략에 대한 깊은 대화</p>
+        </div>
+        <a class="btn btn--text" href="#">전체보기<span class="icon icon--sm icon--after">chevron_right</span></a>
+      </div>
+      <div class="railgrid">
+
+        <article class="vcard vcard--overlay">
+          <div class="thumb thumb--wide">
+            <img src="../assets/images/thumbnails/forum-217.jpg" alt="">
+            <div class="thumb__scrim"><a class="mediabtn mediabtn--lg" href="video-light.html" aria-label="제216회 트레바리 결핍과 비즈니스를 잇다 재생"><span class="icon">play_arrow</span></a></div>
+            <span class="tag tag--dark thumb__br">42:10</span>
+          </div>
+          <span class="series series--orange">리더스포럼</span>
+          <p class="t-body-strong clamp-2">제216회 | 트레바리: 결핍과 비즈니스를 잇다</p>
+          <div class="vcard__speaker"><span class="avatar avatar--xs"><img src="../assets/images/people/speaker-01.jpg" alt=""></span><span class="vcard__name">윤수영 트레바리 대표</span></div>
+          <span class="vcard__date">2026-06-28</span>
+        </article>
+
+        <article class="vcard vcard--overlay">
+          <div class="thumb thumb--wide">
+            <img src="../assets/images/thumbnails/forum-216.jpg" alt="">
+            <div class="thumb__scrim"><a class="mediabtn mediabtn--lg" href="video-light.html" aria-label="제215회 지금 필요한 것은 리더일까 관리자일까 재생"><span class="icon">play_arrow</span></a></div>
+            <span class="tag tag--dark thumb__br">46:38</span>
+          </div>
+          <span class="series series--orange">리더스포럼</span>
+          <p class="t-body-strong clamp-2">제215회 | 지금 필요한 것은 리더일까, 관리자일까</p>
+          <div class="vcard__speaker"><span class="avatar avatar--xs"><img src="../assets/images/people/speaker-01.jpg" alt=""></span><span class="vcard__name">신수정 임팩트리더스 아카데미 대표</span></div>
+          <span class="vcard__date">2026-06-12</span>
+        </article>
+
+        <article class="vcard vcard--overlay">
+          <div class="thumb thumb--wide">
+            <img src="../assets/images/thumbnails/class-econ.jpg" alt="">
+            <div class="thumb__scrim"><a class="mediabtn mediabtn--lg" href="video-light.html" aria-label="제214회 검색의 종말 AI 시대의 비즈니스 전략 재생"><span class="icon">play_arrow</span></a></div>
+            <span class="tag tag--dark thumb__br">45:30</span>
+          </div>
+          <span class="series series--orange">리더스포럼</span>
+          <p class="t-body-strong clamp-2">제214회 | 검색의 종말, AI 시대의 비즈니스 전략</p>
+          <div class="vcard__speaker"><span class="avatar avatar--xs"><img src="../assets/images/people/speaker-01.jpg" alt=""></span><span class="vcard__name">손승완 에이넥트 대표</span></div>
+          <span class="vcard__date">2026-05-30</span>
+        </article>
+
+        <article class="vcard vcard--overlay">
+          <div class="thumb thumb--wide">
+            <img src="../assets/images/thumbnails/ceo-634.jpg" alt="">
+            <div class="thumb__scrim"><a class="mediabtn mediabtn--lg" href="video-light.html" aria-label="제213회 브랜드의 성패는 감각이 가른다 재생"><span class="icon">play_arrow</span></a></div>
+            <span class="tag tag--dark thumb__br">44:18</span>
+          </div>
+          <span class="series series--orange">리더스포럼</span>
+          <p class="t-body-strong clamp-2">제213회 | 브랜드의 성패는 감각이 가른다</p>
+          <div class="vcard__speaker"><span class="avatar avatar--xs"><img src="../assets/images/people/speaker-01.jpg" alt=""></span><span class="vcard__name">김종원 롱블랙 부대표</span></div>
+          <span class="vcard__date">2026-05-16</span>
+        </article>
+
+      </div>
+    </div>
+
+    <div class="block">
+      <div class="block__head">
+        <div class="block__left">
+          <p class="block__title">특별한클라스</p>
+          <p class="block__tip">일과 삶을 바꾸는 실전 클래스 — 건강 · 커리어 · 관계의 노하우</p>
+        </div>
+        <a class="btn btn--text" href="#">전체보기<span class="icon icon--sm icon--after">chevron_right</span></a>
+      </div>
+      <div class="railgrid">
+
+        <article class="vcard vcard--overlay">
+          <div class="thumb thumb--wide">
+            <img src="../assets/images/thumbnails/class-ep6.jpg" alt="">
+            <div class="thumb__scrim"><a class="mediabtn mediabtn--lg" href="video-light.html" aria-label="Ep.6 마흔부터 생존 감량 재생"><span class="icon">play_arrow</span></a></div>
+            <span class="tag tag--dark thumb__br">22:41</span>
+          </div>
+          <span class="series series--green">특별한클라스</span>
+          <p class="t-body-strong clamp-2">Ep.6 마흔부터 생존 감량</p>
+          <div class="vcard__speaker"><span class="avatar avatar--xs"><img src="../assets/images/people/speaker-01.jpg" alt=""></span><span class="vcard__name">마선호 트레이너</span></div>
+          <span class="vcard__date">2026-06-12</span>
+        </article>
+
+        <article class="vcard vcard--overlay">
+          <div class="thumb thumb--wide">
+            <img src="../assets/images/thumbnails/tip-202607.jpg" alt="">
+            <div class="thumb__scrim"><a class="mediabtn mediabtn--lg" href="video-light.html" aria-label="Ep.5 보이지 않는 결제가 만드는 비즈니스 재생"><span class="icon">play_arrow</span></a></div>
+            <span class="tag tag--dark thumb__br">19:12</span>
+          </div>
+          <span class="series series--green">특별한클라스</span>
+          <p class="t-body-strong clamp-2">Ep.5 보이지 않는 결제가 만드는 비즈니스</p>
+          <div class="vcard__speaker"><span class="avatar avatar--xs"><img src="../assets/images/people/speaker-01.jpg" alt=""></span><span class="vcard__name">이승건 토스 대표</span></div>
+          <span class="vcard__date">2026-05-30</span>
+        </article>
+
+        <article class="vcard vcard--overlay">
+          <div class="thumb thumb--wide">
+            <img src="../assets/images/thumbnails/class-ep4.jpg" alt="">
+            <div class="thumb__scrim"><a class="mediabtn mediabtn--lg" href="video-light.html" aria-label="Ep.4 나를 지키며 일하는 법 재생"><span class="icon">play_arrow</span></a></div>
+            <span class="tag tag--dark thumb__br">23:18</span>
+          </div>
+          <span class="series series--green">특별한클라스</span>
+          <p class="t-body-strong clamp-2">Ep.4 나를 지키며 일하는 법</p>
+          <div class="vcard__speaker"><span class="avatar avatar--xs"><img src="../assets/images/people/speaker-01.jpg" alt=""></span><span class="vcard__name">문요한 정신건강의학과 전문의</span></div>
+          <span class="vcard__date">2026-05-16</span>
+        </article>
+
+        <article class="vcard vcard--overlay">
+          <div class="thumb thumb--wide">
+            <img src="../assets/images/thumbnails/forum-216.jpg" alt="">
+            <div class="thumb__scrim"><a class="mediabtn mediabtn--lg" href="video-light.html" aria-label="Ep.3 좋은 동료란 무엇인가 재생"><span class="icon">play_arrow</span></a></div>
+            <span class="tag tag--dark thumb__br">21:05</span>
+          </div>
+          <span class="series series--green">특별한클라스</span>
+          <p class="t-body-strong clamp-2">Ep.3 좋은 동료란 무엇인가</p>
+          <div class="vcard__speaker"><span class="avatar avatar--xs"><img src="../assets/images/people/speaker-01.jpg" alt=""></span><span class="vcard__name">김호 더랩에이치 대표</span></div>
+          <span class="vcard__date">2026-04-25</span>
+        </article>
+
+      </div>
+    </div>
+
+    <!-- ========== 연사별 콘텐츠 ========== -->
+    <div class="block">
+      <div class="block__head">
+        <div class="block__left">
+          <p class="block__title">연사별 콘텐츠</p>
+          <p class="block__tip">관심 연사의 강연을 모아 보세요</p>
+        </div>
+        <a class="btn btn--text" href="#">전체 연사<span class="icon icon--sm icon--after">chevron_right</span></a>
+      </div>
+      <div class="speakers">
+        <a class="speaker" href="#">
+          <span class="avatar avatar--lg"><img src="../assets/images/people/speaker-01.jpg" alt=""></span>
+          <span class="speaker__body">
+            <span class="speaker__name">신수정</span>
+            <span class="speaker__role">임팩트리더스 아카데미 대표 · 강연 6</span>
+          </span>
+        </a>
+        <a class="speaker" href="#">
+          <span class="avatar avatar--lg"><img src="../assets/images/people/speaker-01.jpg" alt=""></span>
+          <span class="speaker__body">
+            <span class="speaker__name">윤수영</span>
+            <span class="speaker__role">트레바리 대표 · 강연 2</span>
+          </span>
+        </a>
+        <a class="speaker" href="#">
+          <span class="avatar avatar--lg"><img src="../assets/images/people/speaker-01.jpg" alt=""></span>
+          <span class="speaker__body">
+            <span class="speaker__name">오건영</span>
+            <span class="speaker__role">신한 프리미어 패스파인더 단장 · 강연 4</span>
+          </span>
+        </a>
+        <a class="speaker" href="#">
+          <span class="avatar avatar--lg"><img src="../assets/images/people/speaker-jang.jpg" alt=""></span>
+          <span class="speaker__body">
+            <span class="speaker__name">권오현</span>
+            <span class="speaker__role">오렌지플래닛 창업재단 이사장 · 강연 3</span>
+          </span>
+        </a>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<footer class="foot">
+  <div class="foot__inner">
+  <img src="../assets/images/logo/logo.png" alt="stud.io">
+  <div class="foot__right">
+    <div class="foot__addr">
+      <span>KMA stud.io | 사단법인 한국능률협회 | 상근부회장 최권석</span>
+      <span>사업자등록번호: 105-82-01810 | 통신판매업신고: 2010-서울영등포-0460</span>
+      <span>서울특별시 영등포구 여의사당대로 22 이룸센터 8-10층 (8-9층 본회, 10층 공개교육센터)</span>
+    </div>
+    <div class="foot__links">
+      <a href="#">이용약관</a><span class="foot__sep">|</span><a href="#">개인정보 처리방침</a><span class="foot__sep">|</span><a href="#">공지사항</a><span class="foot__sep">|</span><a href="#">FAQ</a><span class="foot__sep">|</span><a href="#">1:1 문의</a><span class="foot__sep">|</span><a href="#">이용자가이드</a>
+    </div>
+    <span class="foot__copy">Copyright © 2024 by KMA. All rights reserved.</span>
+  </div>
+  </div>
+</footer>
+
+<!-- 맨 위로 — 한 화면쯤 내려가면 나타납니다 -->
+<button class="totop" type="button" id="toTop" aria-label="맨 위로"><span class="icon">arrow_upward</span></button>
+
+<script src="sample.js"></script>
+</body>
+
+</html>

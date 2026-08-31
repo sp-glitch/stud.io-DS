@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="dark">
+
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>stud.io · ASK HR (디자인 시스템 적용)</title>
+<link rel="icon" type="image/png" href="../assets/images/favicon.png">
+<link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="sample.css">
+<style>
+/* ============================================================
+   ASK HR — 이 화면에만 필요한 배치
+   다른 화면과 달리 문서가 아니라 '대화 도구'다. 그래서 본문이 흐르지 않고
+   화면 높이에 고정되며, 스크롤은 대화 기록과 오른쪽 패널 안에서만 일어난다.
+   ============================================================ */
+.askmain{display:flex;flex-direction:column;min-width:0;height:calc(100vh - var(--appbar-h));box-sizing:border-box}
+
+.askhead{flex:none;padding:var(--spacing-md) var(--spacing-lg);border-bottom:var(--border-width) solid var(--border-subtle);text-align:center}
+.askhead__title{font-size:var(--font-size-subhead);font-weight:var(--font-weight-bold);color:var(--text-heading)}
+.askhead__sub{margin-top:var(--spacing-3xs);font-size:var(--font-size-caption);color:var(--text-tertiary)}
+
+.askbody{flex:1;display:flex;min-height:0}
+
+/* 대화 — 읽는 폭을 넘기지 않는다 (디자인 시스템 --text-measure 와 같은 취지) */
+.chat{flex:1;display:flex;flex-direction:column;min-width:0;max-width:860px}
+.chat__log{flex:1;overflow-y:auto;padding:var(--spacing-lg);display:flex;flex-direction:column;gap:var(--spacing-md)}
+
+.msg{display:flex;gap:var(--spacing-xs);align-items:flex-start}
+/* AI 아바타 — 사람 아바타(.avatar)와 구분되도록 브랜드 톤의 원으로 둔다 */
+.msg__bot{flex:none;width:38px;height:38px;border-radius:var(--radius-full);background:radial-gradient(circle at 30% 30%,var(--color-brand-300),var(--color-brand-700))}
+.msg__body{display:flex;flex-direction:column;gap:var(--spacing-3xs);min-width:0}
+.msg__who{font-size:var(--font-size-sm);font-weight:var(--font-weight-bold);color:var(--text-heading)}
+.msg__text{font-size:var(--font-size-sm);line-height:var(--line-height-body);color:var(--text-secondary)}
+
+/* 질문 분야 카드 — 말풍선 아래에 붙으므로 아바타 폭(38)+간격(12)만큼 들여쓴다 */
+.asktopics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--spacing-xs);margin-left:50px}
+.asktopic{display:flex;align-items:center;gap:var(--spacing-xs);padding:var(--spacing-sm);border:var(--border-width) solid var(--border-default);border-radius:var(--radius-lg);background:var(--bg-surface);cursor:pointer;transition:border-color var(--duration-hover) var(--ease-out),background var(--duration-hover) var(--ease-out)}
+.asktopic:hover{border-color:var(--border-brand);background:var(--fill-brand-soft)}
+.asktopic__icon{flex:none;display:grid;place-items:center;width:42px;height:42px;border-radius:var(--radius-md);background:var(--fill-brand-soft);color:var(--text-brand)}
+.asktopic__body{display:flex;flex-direction:column;gap:2px;min-width:0}
+.asktopic__title{font-size:var(--font-size-sm);font-weight:var(--font-weight-bold);color:var(--text-heading)}
+.asktopic__desc{font-size:var(--font-size-caption);color:var(--text-tertiary)}
+
+/* 입력줄 — 이 화면의 주 동선이라 테두리를 브랜드로 켜 둔다 */
+.askinput{flex:none;padding:var(--spacing-sm) var(--spacing-lg) var(--spacing-md)}
+.askinput__box{display:flex;align-items:center;gap:var(--spacing-2xs);padding:var(--spacing-xs) var(--spacing-sm);border:var(--border-width) solid var(--border-brand);border-radius:var(--radius-lg);background:var(--fill-brand-soft)}
+.askinput__box input{flex:1;min-width:0;border:0;outline:0;background:transparent;font-family:var(--font-sans);font-size:var(--font-size-body);color:var(--text-primary)}
+.askinput__box input::placeholder{color:var(--text-eyebrow)}
+.askinput__send{flex:none;display:grid;place-items:center;width:42px;height:42px;padding:0;border:0;border-radius:var(--radius-md);background:var(--fill-brand);color:var(--text-on-brand);cursor:pointer;transition:background var(--duration-hover) var(--ease-out)}
+.askinput__send:hover{background:var(--fill-brand-hover)}
+.askinput__send:focus-visible{outline:2px solid var(--border-brand);outline-offset:2px}
+
+/* 오른쪽 패널 — 바로가기 · 최근 항목 · 계정 */
+.askpanel{flex:none;width:340px;display:flex;flex-direction:column;min-height:0;border-left:var(--border-width) solid var(--border-subtle);background:var(--bg-sidebar)}
+.askpanel__scroll{flex:1;overflow-y:auto;padding:var(--spacing-md)}
+.askpanel__label{margin-bottom:var(--spacing-2xs);font-size:var(--font-size-caption);font-weight:var(--font-weight-bold);color:var(--text-eyebrow)}
+.askpanel__group{margin-bottom:var(--spacing-lg)}
+.quick{display:flex;align-items:center;gap:var(--spacing-2xs);padding:11px var(--spacing-2xs);border-radius:var(--radius-sm);font-size:var(--font-size-sm);font-weight:var(--font-weight-medium);color:var(--text-secondary);cursor:pointer;transition:background var(--duration-hover)}
+.quick:hover{background:var(--bg-sidebar-hover);color:var(--text-heading)}
+.recent{display:flex;align-items:center;justify-content:space-between;gap:var(--spacing-2xs);padding:13px var(--spacing-3xs);border-bottom:var(--border-width) solid var(--border-subtle);cursor:pointer}
+.recent:hover{background:var(--bg-hover)}
+.recent__title{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:var(--font-size-caption);font-weight:var(--font-weight-medium);color:var(--text-primary)}
+.recent__date{flex:none;font-variant-numeric:tabular-nums;font-size:var(--font-size-tag);color:var(--text-eyebrow)}
+.askpanel__end{padding:var(--spacing-md) 0;text-align:center;font-size:var(--font-size-tag);color:var(--text-disabled)}
+.askpanel__foot{flex:none;padding:var(--spacing-xs) var(--spacing-md);border-top:var(--border-width) solid var(--border-subtle)}
+.askme{display:flex;align-items:center;gap:var(--spacing-2xs)}
+.askme__body{display:flex;flex-direction:column;gap:2px;min-width:0}
+.askme__name{font-size:var(--font-size-caption);font-weight:var(--font-weight-bold);color:var(--text-heading)}
+.askme__plan{font-size:var(--font-size-tag);color:var(--text-tertiary)}
+
+@media (max-width:1100px){
+  /* 대화가 주인공이다 — 좁아지면 보조 패널을 먼저 접는다 */
+  .askpanel{display:none}
+  .chat{max-width:none}
+  .askmain{height:auto;min-height:calc(100vh - var(--appbar-h))}
+}
+@media (max-width:680px){
+  .asktopics{grid-template-columns:minmax(0,1fr);margin-left:0}
+  .chat__log,.askinput{padding-left:var(--spacing-md);padding-right:var(--spacing-md)}
+}
+</style>
+</head>
+
+<body>
+
+<!-- ==================== 고정 헤더 ==================== -->
+<header class="appbar">
+  <div class="appbar__inner">
+    <a class="appbar__logo" href="home.html"><img src="../assets/images/logo/logo-dark.png" alt="stud.io"></a>
+    <span class="appbar__user">
+      <span class="avatar avatar--sm"><img src="../assets/images/people/speaker-01.jpg" alt=""></span>
+      <span><strong>장예지</strong>님, 안녕하세요!</span>
+      <a class="btn btn--text" href="#">로그아웃</a>
+    </span>
+  </div>
+</header>
+
+<div class="shell">
+
+  <!-- ==================== 사이드바 ==================== -->
+  <aside class="snav">
+    <a class="snav__link" href="home.html"><span class="icon icon--sm">home</span>홈</a>
+    <a class="snav__link" href="original.html"><span class="icon icon--sm">movie</span>오리지널</a>
+    <a class="snav__link" href="#"><span class="icon icon--sm">bolt</span>브리프</a>
+    <a class="snav__link" href="#"><span class="icon icon--sm">dynamic_feed</span>피드</a>
+    <a class="snav__link" href="elearning.html"><span class="icon icon--sm">school</span>이러닝</a>
+    <a class="snav__link is-active" href="askhr.html"><span class="icon icon--sm">support_agent</span>ASK HR</a>
+    <a class="snav__link" href="#"><span class="icon icon--sm">sensors</span>라이브</a>
+    <div class="snav__rule"></div>
+    <a class="snav__link" href="#">검색</a>
+    <a class="snav__link" href="#">라이브러리</a>
+    <a class="snav__link" href="#">마이스튜디오</a>
+    <a class="snav__link" href="#">멤버십 보러가기</a>
+    <div class="snav__promo">
+      <div class="spec spec--ad">
+        <span class="tag tag--neutral">AD</span>
+        <p class="spec__label">지식 재산을 보호하는 특허 전문 서비스</p>
+        <p class="spec__value">INNOBANK</p>
+      </div>
+      <a class="btn btn--tint btn--sm btn--block snav__lxp" href="#">우리회사 LXP 바로가기</a>
+    </div>
+  </aside>
+
+  <!-- ==================== 본문 ==================== -->
+  <main class="askmain">
+
+    <div class="askhead">
+      <p class="askhead__title">AI 튜터에게 무엇이든 물어보세요</p>
+      <p class="askhead__sub">오늘의 주요 뉴스 · 비즈니스 트렌드 · 교육 과정까지</p>
+    </div>
+
+    <div class="askbody">
+
+      <!-- ========== 대화 ========== -->
+      <div class="chat">
+        <div class="chat__log">
+
+          <div class="msg">
+            <span class="msg__bot"></span>
+            <div class="msg__body">
+              <p class="msg__who">ASK HR</p>
+              <p class="msg__text">안녕하세요! 어떤 내용이 궁금하신가요? 아래에서 질문 분야를 선택하면 더 정확하게 안내해 드릴게요.</p>
+            </div>
+          </div>
+
+          <div class="asktopics">
+            <button class="asktopic" type="button">
+              <span class="asktopic__icon"><span class="icon">forum</span></span>
+              <span class="asktopic__body">
+                <span class="asktopic__title">ASK HR과 자유로운 대화</span>
+                <span class="asktopic__desc">무엇이든 편하게 물어보세요</span>
+              </span>
+            </button>
+            <button class="asktopic" type="button">
+              <span class="asktopic__icon"><span class="icon">help</span></span>
+              <span class="asktopic__body">
+                <span class="asktopic__title">자주 묻는 질문</span>
+                <span class="asktopic__desc">가장 많이 찾는 HR 질문 모음</span>
+              </span>
+            </button>
+            <button class="asktopic" type="button">
+              <span class="asktopic__icon"><span class="icon">smart_toy</span></span>
+              <span class="asktopic__body">
+                <span class="asktopic__title">우리회사 AI 에이전트</span>
+                <span class="asktopic__desc">사내 규정 · 제도 기반 답변</span>
+              </span>
+            </button>
+            <button class="asktopic" type="button">
+              <span class="asktopic__icon"><span class="icon">target</span></span>
+              <span class="asktopic__body">
+                <span class="asktopic__title">나의 역량 기반 추천 과정</span>
+                <span class="asktopic__desc">진단 결과로 맞춤 과정 추천</span>
+              </span>
+            </button>
+          </div>
+
+        </div>
+
+        <div class="askinput">
+          <div class="askinput__box">
+            <input type="text" placeholder="질문 분야를 선택하거나 바로 입력해보세요" aria-label="질문 입력">
+            <button class="askinput__send" type="button" aria-label="보내기"><span class="icon">send</span></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== 오른쪽 패널 ========== -->
+      <aside class="askpanel">
+        <div class="askpanel__scroll">
+
+          <div class="askpanel__group">
+            <p class="askpanel__label">ASK HR 무제한 이용</p>
+            <div class="quick"><span class="icon icon--sm icon--brand">search</span>ASK HR과 자유로운 대화</div>
+            <div class="quick"><span class="icon icon--sm icon--brand">search</span>자주 묻는 질문</div>
+            <div class="quick"><span class="icon icon--sm icon--brand">search</span>우리회사 AI 에이전트</div>
+            <div class="quick"><span class="icon icon--sm icon--brand">search</span>나의 역량 기반 추천 과정</div>
+          </div>
+
+          <div>
+            <p class="askpanel__label">최근 항목</p>
+            <div class="recent"><span class="recent__title">자주 묻는 질문</span><span class="recent__date">26/07/14</span></div>
+            <div class="recent"><span class="recent__title">자주 묻는 질문</span><span class="recent__date">26/07/13</span></div>
+            <div class="recent"><span class="recent__title">ASK HR과 자유로운 대화</span><span class="recent__date">26/05/12</span></div>
+            <div class="recent"><span class="recent__title">ASK HR과 자유로운 대화</span><span class="recent__date">26/04/28</span></div>
+            <div class="recent"><span class="recent__title">자주 묻는 질문</span><span class="recent__date">26/04/28</span></div>
+            <div class="recent"><span class="recent__title">ASK HR과 자유로운 대화</span><span class="recent__date">26/03/10</span></div>
+            <p class="askpanel__end">더 이상 최근 항목이 없습니다</p>
+          </div>
+
+        </div>
+
+        <div class="askpanel__foot">
+          <button class="btn btn--outline btn--sm btn--block" type="button"><span class="icon icon--sm">add_circle</span>새로운 대화</button>
+        </div>
+        <div class="askpanel__foot">
+          <div class="askme">
+            <span class="avatar avatar--md"><img src="../assets/images/people/speaker-01.jpg" alt=""></span>
+            <span class="askme__body">
+              <span class="askme__name">장예지</span>
+              <span class="askme__plan">stud.io CORE</span>
+            </span>
+          </div>
+        </div>
+      </aside>
+
+    </div>
+  </main>
+</div>
+
+<!-- 맨 위로 — 한 화면쯤 내려가면 나타납니다.
+     이 화면은 넓은 화면에서 문서가 스크롤하지 않으므로 그때는 나타나지 않습니다 -->
+<button class="totop" type="button" id="toTop" aria-label="맨 위로"><span class="icon">arrow_upward</span></button>
+
+<script src="sample.js"></script>
+</body>
+
+</html>

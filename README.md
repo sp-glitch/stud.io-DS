@@ -26,16 +26,40 @@ stud.io-design-system/
 │   ├── css/
 │   │   └── style.css               토큰 · 컴포넌트 전체 (11개 섹션으로 구획)
 │   ├── js/
-│   │   └── script.js               인터랙션 (탭 · 아코디언 · 테마 · 스크롤 스파이)
+│   │   └── script.js               인터랙션 (탭 · 아코디언 · 테마 · 스크롤 스파이 · 모달)
 │   └── images/
 │       ├── favicon.png
-│       └── logo/
-│           ├── logo.png            라이트 모드
-│           └── logo-dark.png       다크 모드 (원본 알파 유지 · RGB만 흰색)
+│       ├── logo/
+│       │   ├── logo.png            라이트 모드
+│       │   └── logo-dark.png       다크 모드 (원본 알파 유지 · RGB만 흰색)
+│       ├── thumbnails/             강연 썸네일 (긴 변 1280px · JPEG)
+│       └── people/                 연사 · 사용자 사진
+│
+├── samples/                        개선안을 디자인 시스템으로 다시 만든 화면
+│   ├── sample.css                  화면 골격 (사이드바 · 본문 · 푸터) — 공통
+│   ├── sample.js                   화면 인터랙션 (토글 · 칩 · 탭 · 별점 · 모달) — 공통
+│   └── *.html                      화면마다 다크 · 라이트 두 벌
 │
 └── dist/
     └── index.standalone.html       빌드 산출물 (직접 수정하지 마세요)
 ```
+
+### 샘플 화면을 추가할 때
+
+`samples/` 안에 `<이름>.html` 을 만들고 다음 세 줄로 시작합니다.
+
+```html
+<link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="sample.css">
+<script src="sample.js"></script>
+```
+
+컴포넌트는 전부 디자인 시스템 클래스를 쓰고, 그 화면에만 필요한 그리드만 페이지 안 `<style>` 에 둡니다.
+라이트 버전은 `data-theme="light"` · 제목 · 로고 경로 세 곳만 바꾼 사본입니다.
+만든 뒤 `index.html` 의 **예시 보러가기** 목록과 `build.ps1` 의 샘플 파일명 배열에 함께 추가합니다.
+
+> `home.html` · `elearning.html` 두 화면은 이 방식보다 먼저 만들어져 CSS 를 파일 안에 통째로 품고 있습니다.
+> 새 화면은 위 방식을 쓰고, 두 화면은 필요할 때 옮기면 됩니다.
 
 썸네일 · 배너 자리는 전부 CSS 그라디언트라 이미지 파일이 없습니다.
 실제 이미지를 넣게 되면 `assets/images/` 아래 용도별 폴더(`thumbnails/`, `banners/`)를 만들어 쓰면 됩니다.
@@ -85,6 +109,9 @@ powershell -ExecutionPolicy Bypass -File build.ps1
 - **가독성 하한** — 본문 16px · 최소 14px · 태그 13px. 원본이 10~12px 이어도 이 하한을 지킵니다
 - **대비** — 본문 텍스트는 라이트 · 다크 양쪽에서 WCAG AA(4.5:1) 이상
 - **아이콘** — Google Material Symbols. HTML 에는 아이콘 *이름*만 적고 크기 · 굵기는 CSS 변수로 조절합니다
+- **모달 버튼** — 긍정 · 부정은 낱말이 아니라 *누른 뒤 일어나는 일*로 정합니다.
+  왼쪽 부정 → 오른쪽 긍정, 되돌릴 수 없는 동작만 `.btn--danger`.
+  전체 기준은 문서의 **모달 버튼 규칙**(`index.html#modal-actions`) 에 있습니다
 
 ## 외부 의존
 

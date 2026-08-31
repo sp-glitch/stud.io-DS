@@ -119,7 +119,7 @@
      1-6. 시맨틱 매핑 — 컴포넌트는 아래 변수만 참조합니다
      --------------------------------------------------------------- */
   --bg-page:        var(--color-gray-0);
-  --bg-sidebar:     var(--color-gray-25);
+  --bg-sidebar:     var(--color-gray-0);   /* 본문과 같은 흰 면 — 오른쪽 경계선 하나로만 가른다 */
   --bg-surface:     var(--color-gray-0);
   --bg-preview:     var(--color-gray-0);
   --bg-subtle:      var(--color-gray-100);
@@ -1769,6 +1769,12 @@ code.is-brand { color: var(--color-brand-700); background: var(--color-brand-50)
    카드 바깥으로 판을 늘리면 카드가 담긴 상자(패널)를 뚫고 나가 어색해집니다.
    트리거는 .thumb__scrim 과 같아 한 카드 안에서 따로 놀지 않습니다. */
 .thumb__foot--reveal {
+  /* 아래쪽 띠가 아니라 판 전체를 덮는다 — 썸네일이 통째로 어두워지고 그 위로 설명이 올라온다.
+     (원본 '이러닝 개선안 v2' 의 카드 호버와 같은 방식. 농도는 .thumb__scrim 과 같은 값) */
+  top: 0;
+  justify-content: flex-end;
+  padding-top: var(--spacing-sm);
+  background: var(--fill-scrim-media);
   opacity: 0;
   transform: translateY(6px);
   transition: opacity var(--duration-hover) var(--ease-out), transform var(--duration-hover) var(--ease-out);
@@ -1867,7 +1873,7 @@ code.is-brand { color: var(--color-brand-700); background: var(--color-brand-50)
   border: var(--border-width) solid var(--border-input);
   border-radius: var(--radius-sm);
 }
-.field__area { min-height: 96px; resize: vertical; }
+.field__area { min-height: 96px; resize: none;   /* 크기 조절 손잡이 없음 — 높이는 min-height 로 정한다 */ }
 .field__input:focus, .field__area:focus { outline: none; border-color: var(--border-brand); }
 .field__input::placeholder, .field__area::placeholder { color: var(--text-disabled); }
 .field__file {
@@ -2660,7 +2666,7 @@ body{
   gap:var(--spacing-3xs);
   padding:var(--spacing-md) var(--spacing-sm);
   background:var(--bg-sidebar);
-  border-right:var(--border-width) solid var(--border-subtle);
+  border-right:var(--border-width) solid var(--border-default);
   overflow-y:auto;
 }
 .snav__link{
@@ -2868,25 +2874,91 @@ body{
    상자가 스스로 경계를 가지므로 섹션 위 경계선은 없앤다 — 선이 겹쳐 두 겹으로 보인다. */
 .notice{padding-top:var(--spacing-2xs)}
 
-/* 푸터 */
-/* 사이드바 색 블록과 맞닿지 않도록 한 칸 띄운다 — 붙어 있으면 사이드바가 푸터까지
-   이어진 것처럼 보인다. 위쪽 경계선은 화면 전체 폭으로 긋는다.
-   본문과의 거리는 .mainpane 의 아래 여백(16)이 이미 만들어 주므로 여기서는 더 띄우지 않는다. */
-.foot{
-  border-top:var(--border-width) solid var(--border-default);
+/* ============================================================
+   모달 — Watch Now
+   원본 서비스의 '우편번호 검색 모달'(DaumPostCodeModal)과 같은 골격이다.
+   화면 전체를 덮는 스크림 + 가운데 흰 카드(최대 500px), 최상위 레이어,
+   ESC · 스크림 클릭 · ✕ 세 가지로 닫힌다.
+   스크림 농도는 디자인 시스템의 .modal-demo__scrim 과 같은 값을 쓴다.
+   ============================================================ */
+.modal{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;padding:var(--spacing-md)}
+.modal[hidden]{display:none}          /* display:flex 가 hidden 을 이기므로 명시한다 */
+.modal__scrim{position:absolute;inset:0;background:rgba(17,17,17,.6)}
+
+.modal__dialog{
+  position:relative;
+  display:flex;
+  flex-direction:column;
+  width:min(500px,100%);
+  max-height:calc(100vh - var(--spacing-xl));
+  background:var(--bg-surface);
+  border-radius:var(--radius-lg);
+  box-shadow:var(--shadow-toast);
+  overflow:hidden;
+  animation:modal-in var(--duration-base) var(--ease-out);
 }
-/* 푸터 로고는 브랜드색을 빼고 회색으로 — 본문의 민트와 경쟁하지 않게 */
-.foot__inner > img{filter:grayscale(1);opacity:.6}
-/* 아래 여백은 화면 맨 끝이라 위쪽보다 넉넉해야 잘린 느낌이 들지 않는다 */
-.foot__inner{max-width:var(--layout-max);margin-inline:auto;padding:var(--spacing-lg) var(--spacing-lg) var(--spacing-xl);display:flex;justify-content:space-between;align-items:flex-start;gap:var(--spacing-xl);flex-wrap:wrap}
-.foot img{height:26px;width:auto;flex:none}
-.foot__right{display:flex;flex-direction:column;gap:var(--spacing-sm);text-align:right}
-.foot__addr{display:flex;flex-direction:column;gap:4px;font-size:var(--font-size-caption);line-height:var(--line-height-body);color:var(--text-tertiary)}
-.foot__links{display:flex;gap:var(--spacing-2xs);justify-content:flex-end;flex-wrap:wrap;align-items:center;font-size:var(--font-size-caption)}
-.foot__links a{color:var(--text-tertiary)}
-.foot__links a:hover{color:var(--text-heading)}
-.foot__sep{color:var(--border-strong)}
-.foot__copy{font-size:var(--font-size-caption);color:var(--text-disabled)}
+@keyframes modal-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.modal__dialog{animation:none}}
+
+.modal__head{flex:none;display:flex;align-items:center;justify-content:space-between;gap:var(--spacing-sm);padding:var(--spacing-sm) var(--spacing-md);border-bottom:var(--border-width) solid var(--border-subtle)}
+.modal__title{font-size:var(--font-size-subhead);font-weight:var(--font-weight-semibold);letter-spacing:var(--letter-spacing-snug);color:var(--text-heading)}
+.modal__close{
+  flex:none;display:grid;place-items:center;
+  width:36px;height:36px;
+  margin-right:calc(var(--spacing-2xs) * -1);   /* 글리프의 시각 여백만큼 오른쪽 끝을 맞춘다 */
+  padding:0;border:0;border-radius:var(--radius-full);
+  background:transparent;color:var(--text-tertiary);cursor:pointer;
+  transition:background var(--duration-hover) var(--ease-out),color var(--duration-hover) var(--ease-out);
+}
+.modal__close:hover{background:var(--bg-hover);color:var(--text-heading)}
+.modal__close:focus-visible{outline:2px solid var(--border-brand);outline-offset:2px}
+
+.modal__body{padding:var(--spacing-md);overflow-y:auto}
+
+/* 재생면 — 카드 썸네일과 같은 비율·라운드를 쓴다 */
+.modal__player{position:relative;aspect-ratio:16/9;border-radius:var(--radius-md);overflow:hidden;background:var(--bg-subtle)}
+.modal__player img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+/* 정중앙 재생 버튼 — .mediabtn--lg 와 같은 토큰을 쓰되, 카드용 토글 스크립트에
+   걸리지 않도록 클래스를 따로 둔다 */
+.modal__play{
+  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  display:grid;place-items:center;
+  width:48px;height:48px;padding:0;border:0;
+  border-radius:var(--radius-full);
+  background:var(--fill-btn-overlay);
+  box-shadow:0 0 0 var(--border-width) var(--color-brand),var(--shadow-hover);
+  color:var(--color-brand);
+  --icon-size:var(--icon-size-lg);
+  --icon-fill:1;
+  cursor:pointer;
+  transition:background var(--duration-hover) var(--ease-out),box-shadow var(--duration-hover) var(--ease-out),color var(--duration-hover) var(--ease-out);
+}
+.modal__play:hover{background:var(--fill-btn-overlay-hover);box-shadow:0 0 0 var(--border-width) var(--color-brand-hover),var(--shadow-hover);color:var(--color-brand-hover)}
+.modal__play:focus-visible{outline:2px solid var(--border-brand);outline-offset:2px}
+.modal__dur{position:absolute;right:var(--spacing-2xs);bottom:var(--spacing-2xs)}
+
+/* 카드의 세로 리듬(썸네일 ↔ 라벨 ↔ 제목 ↔ 메타)을 그대로 옮긴다 */
+.modal__label{margin-top:var(--space-media-text)}
+.modal__name{margin-top:var(--space-label-title);color:var(--text-heading)}
+.modal__meta{display:flex;align-items:center;gap:var(--spacing-2xs);margin-top:var(--space-title-meta);color:var(--text-tertiary)}
+
+/* 버튼 줄 — 디자인 시스템의 '모달 버튼 규칙'을 그대로 따른다.
+   ① 왼쪽이 부정(되돌리기), 오른쪽 끝이 긍정(진행)
+   ② DOM 순서 = 화면 순서 = 탭 순서 (row-reverse 로 눈속임하지 않는다)
+   ③ 두 버튼의 최소 폭을 맞춘다 — 폭이 다르면 위계가 길이로 읽힌다 */
+.modal__actions{flex:none;display:flex;gap:var(--spacing-2xs);padding:0 var(--spacing-md) var(--spacing-md)}
+/* 버튼이 줄을 나눠 가진다 — 둘이면 반씩, 하나면 꽉. 모달마다 버튼 자리가 같아진다 */
+.modal__actions .btn{flex:1;min-width:0}
+
+/* 모달이 열린 동안 뒤 페이지가 따라 스크롤되지 않게 잠근다 */
+body.is-modal-open{overflow:hidden}
+
+@media (max-width:680px){
+  /* 세로로 쌓되 순서를 뒤집지 않는다 — 주 버튼이 아래(엄지가 닿는 자리)로 가면서 탭 순서도 그대로다 */
+  .modal__actions{flex-direction:column}
+  /* 세로로 쌓을 때는 flex-basis 0 이 높이를 0 으로 만들므로 되돌린다 */
+  .modal__actions .btn{flex:none;width:100%}
+}
 
 @media (max-width:1280px){
   .clips{grid-template-columns:repeat(4,minmax(0,1fr))}
@@ -2908,6 +2980,42 @@ body{
   .foot__right{text-align:left}
   .foot__links{justify-content:flex-start}
 }
+/* 푸터 */
+/* 사이드바 색 블록과 맞닿지 않도록 한 칸 띄운다 — 붙어 있으면 사이드바가 푸터까지
+   이어진 것처럼 보인다. 위쪽 경계선은 화면 전체 폭으로 긋는다.
+   본문과의 거리는 .mainpane 의 아래 여백(16)이 이미 만들어 주므로 여기서는 더 띄우지 않는다. */
+.foot{
+  border-top:var(--border-width) solid var(--border-default);
+}
+/* 푸터 로고는 브랜드색을 빼고 회색으로 — 본문의 민트와 경쟁하지 않게 */
+.foot__inner > img{filter:grayscale(1);opacity:.6}
+/* 아래 여백은 화면 맨 끝이라 위쪽보다 넉넉해야 잘린 느낌이 들지 않는다 */
+.foot__inner{max-width:var(--layout-max);margin-inline:auto;padding:var(--spacing-lg) var(--spacing-lg) var(--spacing-xl);display:flex;justify-content:space-between;align-items:flex-start;gap:var(--spacing-xl);flex-wrap:wrap}
+.foot img{height:26px;width:auto;flex:none}
+.foot__right{display:flex;flex-direction:column;gap:var(--spacing-sm);text-align:right}
+.foot__addr{display:flex;flex-direction:column;gap:4px;font-size:var(--font-size-caption);line-height:var(--line-height-body);color:var(--text-tertiary)}
+.foot__links{display:flex;gap:var(--spacing-2xs);justify-content:flex-end;flex-wrap:wrap;align-items:center;font-size:var(--font-size-caption)}
+.foot__links a{color:var(--text-tertiary)}
+.foot__links a:hover{color:var(--text-heading)}
+.foot__sep{color:var(--border-strong)}
+.foot__copy{font-size:var(--font-size-caption);color:var(--text-disabled)}
+
+/* ============================================================
+   맨 위로
+   길어진 화면에서 꼭대기로 돌아가는 단 하나의 버튼. 모든 페이지에 같은 자리(오른쪽 아래)다.
+   한 화면쯤 내려간 뒤에야 나타난다 — 처음부터 떠 있으면 아직 필요하지도 않은 버튼이 본문을 계속 가린다.
+   숨길 때 opacity 만 내리지 않고 visibility 까지 끈다. 그래야 보이지 않는 동안
+   탭 순서와 스크린리더에서도 함께 빠진다.
+   (이 화면은 CSS 사본을 품고 있어 디자인 시스템의 .totop 규칙을 여기 옮겨 둔다)
+   ============================================================ */
+html{scroll-behavior:smooth}   /* 모션 최소화 설정은 위 [9] 의 미디어쿼리가 되돌린다 */
+.totop{position:fixed;right:var(--spacing-lg);bottom:var(--spacing-lg);z-index:60;display:grid;place-items:center;width:48px;height:48px;padding:0;border:var(--border-width) solid var(--border-default);border-radius:var(--radius-full);background:var(--bg-surface);color:var(--text-secondary);box-shadow:var(--shadow-toast);cursor:pointer;opacity:0;visibility:hidden;transform:translateY(8px);transition:opacity var(--duration-hover) var(--ease-out),transform var(--duration-hover) var(--ease-out),visibility var(--duration-hover),background var(--duration-hover),border-color var(--duration-hover),color var(--duration-hover)}
+.totop.is-visible{opacity:1;visibility:visible;transform:none}
+.totop:hover{background:var(--bg-hover-strong);border-color:var(--border-brand);color:var(--text-brand-hover)}
+.totop:active{transform:scale(var(--press-scale))}
+.totop:focus-visible{outline:2px solid var(--border-brand);outline-offset:2px}
+[tabindex="-1"]:focus{outline:none}
+@media (max-width:680px){.totop{right:var(--spacing-sm);bottom:var(--spacing-sm)}}
 </style>
 </head>
 <body>
@@ -2965,7 +3073,7 @@ body{
         <span class="banner__nav banner__nav--lg banner__nav--prev showcase__nav showcase__nav--prev"><span class="icon">chevron_left</span></span>
         <span class="banner__nav banner__nav--lg banner__nav--next showcase__nav showcase__nav--next"><span class="icon">chevron_right</span></span>
         <div class="showcase__scrim">
-          <a class="btn btn--primary" href="#"><span class="icon icon--sm icon--fill">play_arrow</span>Watch Now</a>
+          <button class="btn btn--primary" type="button" data-modal-open="watch-modal" aria-haspopup="dialog"><span class="icon icon--sm icon--fill">play_arrow</span>Watch Now</button>
         </div>
         <span class="showcase__dots">
           <span class="banner__dot is-active"></span>
@@ -3342,7 +3450,39 @@ body{
   </div>
   </div>
 </footer>
+<!-- ==================== Watch Now 모달 ====================
+     우편번호 검색 모달과 같은 구성 — 스크림 + 가운데 카드.
+     닫기 지점은 data-modal-close 로 표시한다 (스크림 · ✕ · 나중에 보기) -->
+<div class="modal" id="watch-modal" hidden>
+  <div class="modal__scrim" data-modal-close></div>
+  <div class="modal__dialog" role="dialog" aria-modal="true" aria-labelledby="watch-modal-title">
+    <div class="modal__head">
+      <p class="modal__title" id="watch-modal-title">이번 주 대표 콘텐츠</p>
+      <button class="modal__close" type="button" data-modal-close aria-label="닫기"><span class="icon">close</span></button>
+    </div>
+    <div class="modal__body">
+      <div class="modal__player">
+        <img id="watch-modal-poster" alt="">
+        <button class="modal__play" type="button" aria-label="재생"><span class="icon">play_arrow</span></button>
+        <span class="tag tag--dark modal__dur">52:40</span>
+      </div>
+      <p class="series series--gold modal__label">최고경영자조찬회</p>
+      <p class="t-subhead modal__name">제634회 | 초격차 경영</p>
+      <p class="t-caption modal__meta"><span class="avatar avatar--xs"></span>권오현 오렌지플래닛 창업재단 이사장 · 2026. 7. 3 (금) 공개</p>
+    </div>
+    <!-- 왼쪽 부정(아무 일도 일어나지 않음) → 오른쪽 긍정(모달을 연 목적을 완수).
+         되돌릴 수 있는 동작이라 긍정은 Danger 가 아니라 Primary 다.
+         둘 다 이동이 아니라 액션이므로 <a> 가 아닌 <button> 을 쓴다 -->
+    <div class="modal__actions">
+      <button class="btn btn--outline" type="button" data-modal-close>나중에 보기</button>
+      <button class="btn btn--primary" type="button" data-modal-close data-modal-focus><span
+          class="icon icon--sm icon--fill">play_arrow</span>지금 재생</button>
+    </div>
+  </div>
+</div>
 
+<!-- 맨 위로 — 한 화면쯤 내려가면 나타납니다 -->
+<button class="totop" type="button" id="toTop" aria-label="맨 위로"><span class="icon">arrow_upward</span></button>
 <script>
 /* 좋아요 · 저장 토글 — 카드 클릭이나 링크 동작에 영향을 주지 않도록 전파를 끊는다. mediabtn 토글 */
 document.querySelectorAll('.mediabtn').forEach(function (btn) {
@@ -3352,6 +3492,123 @@ document.querySelectorAll('.mediabtn').forEach(function (btn) {
     btn.setAttribute('aria-pressed', btn.getAttribute('aria-pressed') === 'true' ? 'false' : 'true');
   });
 });
-</script>
+
+/* 모달 — 디자인 시스템 script.js 의 [9] 와 같은 규약이다.
+     [data-modal-open="id"]  여는 버튼
+     [data-modal-close]      닫는 지점 (스크림 · ✕ · 부정 버튼)
+     [data-modal-focus]      열었을 때 포커스를 받을 자리
+   닫는 방법(스크림 · ESC · 부정 버튼)은 모두 같은 결과여야 한다 —
+   "아무 일도 일어나지 않고 직전 상태로 돌아간다"가 곧 부정의 정의다. */
+(function () {
+  var FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+  var openedModal = null;
+  var modalOpener = null;
+
+  function focusables(modal) {
+    return Array.prototype.filter.call(modal.querySelectorAll(FOCUSABLE), function (el) {
+      return el.offsetParent !== null;
+    });
+  }
+
+  /* 배너 이미지를 그대로 재생면에 올린다 — 같은 데이터를 두 벌 두지 않기 위해서다 */
+  function syncPoster(modal) {
+    var poster = modal.querySelector('#watch-modal-poster');
+    var banner = document.querySelector('.showcase img');
+    if (!poster || !banner) { return; }
+    if (poster.getAttribute('src') === banner.getAttribute('src')) { return; }
+    poster.src = banner.src;
+    poster.alt = banner.alt;
+  }
+
+  function showModal(modal, opener) {
+    if (openedModal) { hideModal(); }
+    syncPoster(modal);
+    openedModal = modal;
+    modalOpener = opener || null;
+    modal.hidden = false;
+    document.body.classList.add('is-modal-open');
+
+    var first = modal.querySelector('[data-modal-focus]') || focusables(modal)[0];
+    if (first) { first.focus(); }
+  }
+
+  function hideModal() {
+    if (!openedModal) { return; }
+    openedModal.hidden = true;
+    openedModal = null;
+    document.body.classList.remove('is-modal-open');
+    if (modalOpener && modalOpener.focus) { modalOpener.focus(); }
+    modalOpener = null;
+  }
+
+  document.addEventListener('click', function (event) {
+    if (!event.target || !event.target.closest) { return; }
+
+    var opener = event.target.closest('[data-modal-open]');
+    if (opener) {
+      var target = document.getElementById(opener.getAttribute('data-modal-open'));
+      if (target) {
+        event.preventDefault();
+        showModal(target, opener);
+      }
+      return;
+    }
+
+    if (event.target.closest('[data-modal-close]')) { hideModal(); }
+  });
+
+  document.addEventListener('keydown', function (event) {
+    if (!openedModal) { return; }
+
+    if (event.key === 'Escape') {
+      hideModal();
+      return;
+    }
+
+    /* 포커스 트랩 — 마지막에서 Tab, 첫 항목에서 Shift+Tab 이면 반대편으로 넘긴다 */
+    if (event.key !== 'Tab') { return; }
+
+    var items = focusables(openedModal);
+    if (!items.length) { return; }
+
+    var first = items[0];
+    var last = items[items.length - 1];
+
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  });
+})();
+
+/* 맨 위로 — 디자인 시스템 script.js 의 [10] 과 같다.
+   이 화면은 문서 전체가 스크롤한다. 부드러움은 CSS 의 scroll-behavior 가 담당한다. */
+(function () {
+  var toTopBtn = document.getElementById('toTop');
+  if (!toTopBtn) { return; }
+
+  var TOTOP_AT = 400;   // 한 화면쯤 내려간 뒤에 나타난다
+
+  function syncToTop() {
+    toTopBtn.classList.toggle('is-visible', window.scrollY > TOTOP_AT);
+  }
+
+  window.addEventListener('scroll', syncToTop, { passive: true });
+
+  toTopBtn.addEventListener('click', function () {
+    document.documentElement.scrollTop = 0;
+    /* 포커스도 함께 올린다 — 버튼이 곧 사라지므로 갈 곳을 만들어 둔다 */
+    var main = document.querySelector('main');
+    if (main) {
+      main.setAttribute('tabindex', '-1');
+      main.focus({ preventScroll: true });
+    }
+  });
+
+  syncToTop();
+})();</script>
 </body>
 </html>

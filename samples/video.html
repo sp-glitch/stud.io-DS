@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="dark">
+
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>stud.io · 영상 상세 (디자인 시스템 적용)</title>
+<link rel="icon" type="image/png" href="../assets/images/favicon.png">
+<link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="sample.css">
+<style>
+/* ============================================================
+   영상 상세 — 이 화면에만 필요한 배치
+   플레이어 · 커리큘럼 · 리뷰 · 별점은 전부 디자인 시스템 컴포넌트다.
+   ============================================================ */
+
+/* 본문 메타와 오른쪽 '최신 콘텐츠' — 플레이어(.player)와 같은 열 비율을 쓴다.
+   두 덩어리가 위아래로 이어져 보이려면 오른쪽 열의 폭이 같아야 한다 */
+.detail{display:grid;grid-template-columns:minmax(0,1fr) clamp(300px,38%,380px);gap:var(--spacing-lg);align-items:start;margin:var(--spacing-md) 0 var(--spacing-2xl)}
+.detail__main{display:flex;flex-direction:column;gap:var(--spacing-sm);min-width:0}
+.detail__top{display:flex;align-items:center;justify-content:space-between;gap:var(--spacing-sm);flex-wrap:wrap}
+.detail__ident{display:flex;align-items:center;gap:var(--spacing-2xs)}
+
+/* 출연진 — 사진 · 이름 · 역할이 한 줄 */
+.cast{display:flex;flex-direction:column;gap:var(--spacing-2xs);margin-top:var(--spacing-2xs)}
+.cast__row{display:flex;align-items:center;gap:var(--spacing-2xs)}
+.cast__name{font-size:var(--font-size-sm);font-weight:var(--font-weight-medium);color:var(--text-primary)}
+
+/* 최신 콘텐츠 — 지금 보는 회차가 맨 위, 나머지는 한 단계 가라앉힌다 */
+.eplist{display:flex;flex-direction:column;gap:var(--spacing-2xs);padding:var(--spacing-md);border:var(--border-width) solid var(--border-default);border-radius:var(--radius-lg);background:var(--bg-surface)}
+.eplist__title{font-size:var(--font-size-sm);font-weight:var(--font-weight-bold);color:var(--text-heading)}
+.ep{display:grid;grid-template-columns:96px minmax(0,1fr);gap:var(--spacing-2xs);align-items:center;padding:var(--spacing-2xs) 0;border-top:var(--border-width) solid var(--border-subtle);cursor:pointer;opacity:.75;transition:opacity var(--duration-hover) var(--ease-out)}
+.ep:hover,.ep.is-current{opacity:1}
+.ep__body{display:flex;flex-direction:column;gap:2px;min-width:0}
+.ep__title{font-size:var(--font-size-caption);font-weight:var(--font-weight-semibold);line-height:var(--line-height-heading);color:var(--text-heading)}
+.ep__dur{font-variant-numeric:tabular-nums;font-size:var(--font-size-tag);color:var(--text-eyebrow)}
+/* 재생 중인 회차는 썸네일 위에 NOW 를 덮는다 — 목록에서 현재 위치가 한눈에 보인다 */
+.ep__now{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:2;font-size:var(--font-size-tag);font-weight:var(--font-weight-bold);color:var(--text-on-brand);background:rgba(1,255,211,.85)}
+
+/* 리뷰 작성 */
+.section-line{padding-top:var(--spacing-lg);border-top:var(--border-width) solid var(--border-default);margin-bottom:var(--spacing-2xl)}
+.reviewform{display:flex;flex-direction:column;gap:var(--spacing-xs);padding:var(--spacing-md);border:var(--border-width) solid var(--border-default);border-radius:var(--radius-lg);background:var(--bg-surface)}
+.reviewform__head{display:flex;align-items:center;gap:var(--spacing-2xs)}
+.reviewform__who{font-size:var(--font-size-sm);font-weight:var(--font-weight-semibold);color:var(--text-heading)}
+.reviewform__foot{display:flex;align-items:center;justify-content:space-between;gap:var(--spacing-xs);flex-wrap:wrap}
+/* 입력칸은 상자 폭을 다 쓴다 — .field 의 max-width:380px 은 넓은 화면에서 한 줄이
+   지나치게 길어지지 않게 잡은 값인데, 이미 폭이 정해진 상자 안에서는 두 번 걸린다 */
+.reviewform .field{max-width:none}
+.reviewform .field__area{min-height:120px}
+
+/* 추천 콘텐츠 4열 */
+.relgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--spacing-md)}
+
+@media (max-width:1100px){
+  .detail{grid-template-columns:minmax(0,1fr)}
+  .relgrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:680px){
+  .relgrid{grid-template-columns:minmax(0,1fr)}
+}
+</style>
+</head>
+
+<body>
+
+<!-- ==================== 고정 헤더 ==================== -->
+<header class="appbar">
+  <div class="appbar__inner">
+    <a class="appbar__logo" href="home.html"><img src="../assets/images/logo/logo-dark.png" alt="stud.io"></a>
+    <span class="appbar__user">
+      <span class="avatar avatar--sm"><img src="../assets/images/people/speaker-01.jpg" alt=""></span>
+      <span><strong>장예지</strong>님, 안녕하세요!</span>
+      <a class="btn btn--text" href="#">로그아웃</a>
+    </span>
+  </div>
+</header>
+
+<div class="shell">
+
+  <!-- ==================== 사이드바 ==================== -->
+  <aside class="snav">
+    <a class="snav__link" href="home.html"><span class="icon icon--sm">home</span>홈</a>
+    <a class="snav__link is-active" href="original.html"><span class="icon icon--sm">movie</span>오리지널</a>
+    <a class="snav__link" href="#"><span class="icon icon--sm">bolt</span>브리프</a>
+    <a class="snav__link" href="#"><span class="icon icon--sm">dynamic_feed</span>피드</a>
+    <a class="snav__link" href="elearning.html"><span class="icon icon--sm">school</span>이러닝</a>
+    <a class="snav__link" href="askhr.html"><span class="icon icon--sm">support_agent</span>ASK HR</a>
+    <a class="snav__link" href="#"><span class="icon icon--sm">sensors</span>라이브</a>
+    <div class="snav__rule"></div>
+    <a class="snav__link" href="#">검색</a>
+    <a class="snav__link" href="#">라이브러리</a>
+    <a class="snav__link" href="#">마이스튜디오</a>
+    <a class="snav__link" href="#">멤버십 보러가기</a>
+    <div class="snav__promo">
+      <div class="spec spec--ad">
+        <span class="tag tag--neutral">AD</span>
+        <p class="spec__label">지식 재산을 보호하는 특허 전문 서비스</p>
+        <p class="spec__value">INNOBANK</p>
+      </div>
+      <a class="btn btn--tint btn--sm btn--block snav__lxp" href="#">우리회사 LXP 바로가기</a>
+    </div>
+  </aside>
+
+  <!-- ==================== 본문 ==================== -->
+  <main class="mainpane">
+
+    <nav class="crumb" aria-label="현재 위치">
+      <a href="original.html"><span class="icon icon--sm">chevron_left</span>오리지널</a>
+      <span class="icon icon--sm">chevron_right</span>
+      <span class="crumb__here">특별한클라스 · Ep.1</span>
+    </nav>
+
+    <!-- ========== 플레이어 (디자인 시스템 .player) ========== -->
+    <div class="player">
+      <div class="player__stage">
+        <img src="../assets/images/thumbnails/class-ep6.jpg" alt="">
+        <span class="player__play"><span class="icon icon--fill">play_arrow</span></span>
+        <div class="player__bar">
+          <div class="player__track"><span></span></div>
+          <div class="player__ctl">
+            <span class="icon icon--sm icon--fill">play_arrow</span>
+            <span>00:00 / 25:07</span>
+            <span class="player__ctl-right">
+              <span class="player__opt">1.0×</span>
+              <span class="player__opt">오디오 모드</span>
+              <span class="icon icon--sm">fullscreen</span>
+            </span>
+          </div>
+        </div>
+      </div>
+      <div class="player__panel">
+        <div class="player__tabs" data-tabs>
+          <span class="player__tab is-active" data-tab="summary">AI 요약</span>
+          <span class="player__tab" data-tab="note">노트</span>
+          <span class="player__tab" data-tab="docs">강의자료</span>
+        </div>
+        <div class="player__body" data-panel="summary">
+          <p class="player__note"><span class="icon icon--brand">smart_toy</span><span class="player__text">AI가 요약한 핵심 내용을 확인해보세요.</span></p>
+          <p class="player__line"><span class="player__n">1</span><span class="player__text">연애 기피는 의지의 문제가 아니라 에너지의 문제 — 회복되지 않은 상태에서 관계는 부담으로 느껴진다.</span></p>
+          <p class="player__line"><span class="player__n">2</span><span class="player__text">정보 과잉이 오히려 시작을 막는다: 비교 기준이 많아질수록 &ldquo;확신이 들 때까지&rdquo; 미루게 된다.</span></p>
+          <p class="player__line"><span class="player__n">3</span><span class="player__text">관계의 시작은 확신이 아니라 호기심 — 작은 접촉면을 늘리는 것이 심리학이 권하는 첫걸음.</span></p>
+        </div>
+        <div class="player__body" data-panel="note" hidden>
+          <div class="placeholder">
+            <span class="icon icon--lg placeholder__icon">stylus_note</span>
+            <p class="placeholder__title">이 영상의 첫 노트를 남겨보세요</p>
+            <p class="placeholder__desc">재생 중 <strong>N 키</strong>를 누르면 현재 시점이 함께 저장돼요.<br>노트는 라이브러리 · 노트 탭에 모입니다.</p>
+            <button class="btn btn--primary btn--sm" type="button">현재 시점에 노트 쓰기</button>
+          </div>
+        </div>
+        <div class="player__body" data-panel="docs" hidden>
+          <p class="player__file">
+            <span class="tag tag--fill">PDF</span>
+            <span class="player__file-body">
+              <span class="player__file-name">Ep.1 강연 슬라이드 요약본</span>
+              <span class="player__file-size">1.2MB</span>
+            </span>
+            <span class="player__file-act">다운로드</span>
+          </p>
+          <p class="player__hint">자료는 회원사 임직원만 다운로드할 수 있어요.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== 본문 메타 + 최신 콘텐츠 ========== -->
+    <div class="detail">
+
+      <div class="detail__main">
+        <div class="detail__top">
+          <span class="detail__ident">
+            <span class="series series--green">특별한클라스</span>
+            <span class="t-num">2026.07.07 · 25:07</span>
+          </span>
+          <span class="detail__acts">
+            <button class="btn btn--outline btn--sm" type="button" aria-pressed="false"><span class="icon icon--sm">bookmark</span>저장</button>
+            <button class="btn btn--outline btn--sm" type="button" aria-pressed="false"><span class="icon icon--sm">favorite</span>찜</button>
+            <button class="btn btn--outline btn--sm" type="button"><span class="icon icon--sm">share</span>공유</button>
+          </span>
+        </div>
+
+        <h1 class="t-title">Ep.1 연애를 망설이는 시대</h1>
+
+        <div class="tag-row">
+          <span class="tag tag--hash tag--success">#연애</span>
+          <span class="tag tag--hash tag--success">#관계심리</span>
+          <span class="tag tag--hash tag--success">#트렌드</span>
+        </div>
+
+        <p class="t-body">소개팅 앱도, 연애 상담도, 정보도 넘쳐나는 시대지만 정작 누군가를 만나 관계를 이어가는 일은 예전보다 더 어려워진 것처럼 느껴집니다. 왜 우리는 사람을 원하면서도 망설이게 될까요?
+          정신건강의학과 허규형 의사와 함께 관계를 시작할 용기의 심리학을 이야기합니다. 관계에 대한 막연한 두려움이 어디서 비롯되는지, 그리고 그 두려움을 넘어서기 위해 지금 당장 시도해볼 수 있는 작은 행동은 무엇인지도
+          함께 짚어봅니다.</p>
+
+        <div class="cast">
+          <p class="t-label">출연진</p>
+          <div class="cast__row">
+            <span class="avatar avatar--md"><img src="../assets/images/people/speaker-01.jpg" alt=""></span>
+            <span class="cast__name">허규형</span>
+            <span class="t-caption">정신건강의학과 의사 · 유튜브 [뇌부자들]</span>
+          </div>
+          <div class="cast__row">
+            <span class="avatar avatar--md"><img src="../assets/images/people/speaker-jang.jpg" alt=""></span>
+            <span class="cast__name">김난영</span>
+            <span class="t-caption">작가 (행동경제학 전문)</span>
+          </div>
+        </div>
+      </div>
+
+      <aside class="eplist">
+        <p class="eplist__title">최신 콘텐츠</p>
+
+        <div class="ep is-current">
+          <div class="thumb thumb--wide">
+            <img src="../assets/images/thumbnails/class-ep6.jpg" alt="">
+            <span class="ep__now">NOW</span>
+          </div>
+          <div class="ep__body">
+            <p class="ep__title clamp-2">Ep.1 연애를 망설이는 시대</p>
+            <span class="ep__dur">25:07 · 시청 중</span>
+          </div>
+        </div>
+
+        <div class="ep">
+          <div class="thumb thumb--wide"><img src="../assets/images/thumbnails/forum-216.jpg" alt=""></div>
+          <div class="ep__body">
+            <p class="ep__title clamp-2">제217회 | 멘탈 회복탄력성</p>
+            <span class="ep__dur">42:10</span>
+          </div>
+        </div>
+
+        <div class="ep">
+          <div class="thumb thumb--wide"><img src="../assets/images/thumbnails/ceo-634.jpg" alt=""></div>
+          <div class="ep__body">
+            <p class="ep__title clamp-2">제634회 | 초격차 경영</p>
+            <span class="ep__dur">52:40</span>
+          </div>
+        </div>
+
+        <div class="ep">
+          <div class="thumb thumb--wide"><img src="../assets/images/thumbnails/class-econ.jpg" alt=""></div>
+          <div class="ep__body">
+            <p class="ep__title clamp-2">2026 하반기 경제전망</p>
+            <span class="ep__dur">38:24</span>
+          </div>
+        </div>
+
+        <div class="ep">
+          <div class="thumb thumb--wide"><img src="../assets/images/thumbnails/class-ep4.jpg" alt=""></div>
+          <div class="ep__body">
+            <p class="ep__title clamp-2">Ep.4 나를 지키며 일하는 법</p>
+            <span class="ep__dur">23:18</span>
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <!-- ========== 리뷰 작성 ========== -->
+    <section class="section-line">
+      <div class="block__head">
+        <div class="block__left">
+          <p class="block__title">리뷰</p>
+          <p class="block__tip">리뷰는 실명으로 공개됩니다</p>
+        </div>
+      </div>
+      <div class="reviewform">
+        <div class="reviewform__head">
+          <span class="avatar avatar--md"><img src="../assets/images/people/speaker-01.jpg" alt=""></span>
+          <span class="reviewform__who">장예지</span>
+          <span class="stars stars--lg stars--input" data-stars><span class="icon stars__star" data-star="1">star</span><span
+              class="stars__star" data-star="2"><span class="icon">star</span></span><span class="icon stars__star" data-star="3">star</span><span
+              class="stars__star" data-star="4"><span class="icon">star</span></span><span class="icon stars__star is-off" data-star="5">star</span></span>
+        </div>
+        <div class="field">
+          <textarea class="field__area" id="review-body" aria-label="리뷰 내용"
+            placeholder="이 영상에 대한 생각을 남겨보세요. 다른 임직원에게 큰 도움이 됩니다."></textarea>
+        </div>
+        <div class="reviewform__foot">
+          <span class="t-caption">등록한 리뷰는 마이스튜디오에서 수정할 수 있어요.</span>
+          <button class="btn btn--primary" type="button">리뷰 등록</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== 추천 콘텐츠 ========== -->
+    <section class="section-line">
+      <div class="block__head">
+        <div class="block__left">
+          <p class="block__title">추천 콘텐츠</p>
+          <p class="block__tip">주제 · 출연진 기반 추천</p>
+        </div>
+      </div>
+      <div class="relgrid">
+
+        <article class="vcard vcard--overlay">
+          <div class="thumb thumb--wide">
+            <img src="../assets/images/thumbnails/class-ep4.jpg" alt="">
+            <div class="thumb__scrim"><a class="mediabtn mediabtn--lg" href="video.html" aria-label="Ep.6 직장인의 건강을 위하여 재생"><span class="icon">play_arrow</span></a></div>
+            <span class="tag tag--dark thumb__br">22:41</span>
+          </div>
+          <span class="series series--green">특별한클라스</span>
+          <p class="t-body-strong clamp-2">Ep.6 직장인의 건강을 위하여 (멘탈 ver.)</p>
+          <div class="vcard__speaker"><span class="avatar avatar--xs"><img src="../assets/images/people/speaker-01.jpg" alt=""></span><span class="vcard__name">허규형 의사</span></div>
+        </article>
+
+        <article class="vcard vcard--overlay">
+          <div class="thumb thumb--wide">
+            <img src="../assets/images/thumbnails/brief-ai.jpg" alt="">
+            <div class="thumb__scrim"><a class="mediabtn mediabtn--lg" href="video.html" aria-label="마음을 여는 두 가지 조건 재생"><span class="icon">play_arrow</span></a></div>
+            <span class="tag tag--dark thumb__br">14:20</span>
+          </div>
+          <span class="series">에스프레소</span>
+          <p class="t-body-strong clamp-2">마음을 여는 두 가지 조건: 호기심과 진정성</p>
+          <div class="vcard__speaker"><span class="avatar avatar--xs"><img src="../assets/images/people/speaker-01.jpg" alt=""></span><span class="vcard__name">조인후 작가</span></div>
+        </article>
+
+        <article class="vcard vcard--overlay">
+          <div class="thumb thumb--wide">
+            <img src="../assets/images/thumbnails/espresso-meeting.jpg" alt="">
+            <div class="thumb__scrim"><a class="mediabtn mediabtn--lg" href="video.html" aria-label="회의를 절반으로 줄이는 규칙 재생"><span class="icon">play_arrow</span></a></div>
+            <span class="tag tag--dark thumb__br">7:38</span>
+          </div>
+          <span class="series">경영의 팁</span>
+          <p class="t-body-strong clamp-2">회의를 절반으로 줄이는 규칙</p>
+          <div class="vcard__speaker"><span class="avatar avatar--xs"><img src="../assets/images/people/speaker-01.jpg" alt=""></span><span class="vcard__name">신수정 대표</span></div>
+        </article>
+
+        <article class="vcard vcard--overlay">
+          <div class="thumb thumb--wide">
+            <img src="../assets/images/thumbnails/forum-216.jpg" alt="">
+            <div class="thumb__scrim"><a class="mediabtn mediabtn--lg" href="video.html" aria-label="제217회 멘탈 회복탄력성 재생"><span class="icon">play_arrow</span></a></div>
+            <span class="tag tag--dark thumb__br">42:10</span>
+          </div>
+          <span class="series series--orange">리더스포럼</span>
+          <p class="t-body-strong clamp-2">제217회 | 멘탈 회복탄력성</p>
+          <div class="vcard__speaker"><span class="avatar avatar--xs"><img src="../assets/images/people/speaker-01.jpg" alt=""></span><span class="vcard__name">정일영 박사</span></div>
+        </article>
+
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<footer class="foot">
+  <div class="foot__inner">
+  <img src="../assets/images/logo/logo-dark.png" alt="stud.io">
+  <div class="foot__right">
+    <div class="foot__addr">
+      <span>KMA stud.io | 사단법인 한국능률협회 | 상근부회장 최권석</span>
+      <span>사업자등록번호: 105-82-01810 | 통신판매업신고: 2010-서울영등포-0460</span>
+      <span>서울특별시 영등포구 여의사당대로 22 이룸센터 8-10층 (8-9층 본회, 10층 공개교육센터)</span>
+    </div>
+    <div class="foot__links">
+      <a href="#">이용약관</a><span class="foot__sep">|</span><a href="#">개인정보 처리방침</a><span class="foot__sep">|</span><a href="#">공지사항</a><span class="foot__sep">|</span><a href="#">FAQ</a><span class="foot__sep">|</span><a href="#">1:1 문의</a><span class="foot__sep">|</span><a href="#">이용자가이드</a>
+    </div>
+    <span class="foot__copy">Copyright © 2024 by KMA. All rights reserved.</span>
+  </div>
+  </div>
+</footer>
+
+<!-- 맨 위로 — 한 화면쯤 내려가면 나타납니다 -->
+<button class="totop" type="button" id="toTop" aria-label="맨 위로"><span class="icon">arrow_upward</span></button>
+
+<script src="sample.js"></script>
+</body>
+
+</html>

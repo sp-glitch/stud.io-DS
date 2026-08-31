@@ -1,0 +1,466 @@
+/* ==========================================================================
+   샘플 화면 골격 — samples/*.html 공통
+   --------------------------------------------------------------------------
+   컴포넌트는 전부 디자인 시스템(assets/css/style.css)의 클래스를 쓰고,
+   이 파일은 "그것들을 어디에 놓을지"만 정합니다.
+   여기 쓰인 값은 모두 디자인 시스템 토큰이며 새 색 · 새 크기를 만들지 않습니다.
+
+   화면 하나에만 필요한 그리드는 이 파일이 아니라 각 페이지의 <style> 에 둡니다.
+
+     [1] 기본        [2] 카드 호버      [3] 화면 골격
+     [4] 공통 조각    [5] 푸터          [6] 반응형
+   ========================================================================== */
+
+
+/* ==========================================================================
+   [1] 기본
+   ========================================================================== */
+body {
+  background: var(--bg-page);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  padding-top: var(--appbar-h);
+  /* 고정 앱바만큼 본문을 내린다 */
+}
+
+/* 디자인 시스템의 .thumb 는 자리표시자(그라데이션)만 정의한다.
+   실제 이미지를 넣을 때의 규칙만 여기서 더한다 — 비율 · 라운드 · 클리핑은 .thumb 가 이미 갖고 있다 */
+.thumb>img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* 플레이어 무대에 포스터를 깔 때 — 컨트롤과 재생 버튼이 위에 얹히므로 이미지는 가라앉힌다 */
+.player__stage>img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: .55;
+}
+
+/* 카드 제목은 2줄에서 자른다 (디자인 시스템 .ecard__title 과 같은 규칙) */
+.clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* 아바타에 실제 사진을 넣을 때 — 원형 · 크기는 .avatar 가 이미 갖고 있으므로 클리핑만 더한다.
+   인물 사진은 얼굴이 위쪽에 있어 가운데로 자르면 턱이 잘린다 — 시선을 위로 올린다 */
+.avatar {
+  overflow: hidden;
+}
+
+.avatar>img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 20%;
+}
+
+
+/* ==========================================================================
+   [2] 카드 호버
+   카드 상자는 그대로 두고 썸네일 안의 이미지만 커진다.
+   .thumb 이 overflow:hidden 이라 이미지가 프레임을 벗어나지 않고,
+   카드 크기가 변하지 않아 그리드가 전혀 흔들리지 않는다.
+   ========================================================================== */
+.vcard {
+  cursor: pointer;
+}
+
+.vcard .thumb>img {
+  transform: scale(1);
+  transition: transform 340ms cubic-bezier(.22, .61, .36, 1);
+}
+
+.vcard:hover .thumb>img {
+  transform: scale(1.06);
+}
+
+/* 좋아요 · 저장 (디자인 시스템 .mediabtn)
+   기본 숨김 → 카드 호버 · 포커스 시 등장 */
+.mediabtn-group {
+  pointer-events: none;
+}
+
+.vcard:hover .mediabtn-group,
+.vcard:focus-within .mediabtn-group {
+  pointer-events: auto;
+}
+
+.mediabtn-group .mediabtn {
+  opacity: 0;
+  transform: translateY(-6px) scale(.94);
+  transition:
+    opacity var(--duration-hover) var(--ease-out),
+    transform var(--duration-hover) var(--ease-out),
+    background var(--duration-hover),
+    box-shadow var(--duration-hover),
+    color var(--duration-hover);
+}
+
+.vcard:hover .mediabtn-group .mediabtn,
+.vcard:focus-within .mediabtn-group .mediabtn {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.vcard:hover .mediabtn-group .mediabtn:nth-child(2),
+.vcard:focus-within .mediabtn-group .mediabtn:nth-child(2) {
+  transition-delay: 50ms;
+}
+
+/* 오버레이 방식 — 썸네일 위에 스크림이 깔리고 정중앙에 재생 아이콘 하나만 나타난다.
+   카드도 이미지도 움직이지 않는다. 모양 · 속도는 전부 디자인 시스템 .thumb__scrim 이 갖고,
+   여기서는 hover 범위만 넓힌다 (썸네일뿐 아니라 아래 제목 · 강사를 가리켜도 뜨게). */
+.vcard--overlay:hover .thumb>img {
+  transform: none;
+}
+
+.vcard--overlay:hover .thumb__scrim,
+.vcard--overlay:focus-within .thumb__scrim {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.vcard--overlay:hover .thumb__scrim .mediabtn,
+.vcard--overlay:focus-within .thumb__scrim .mediabtn {
+  transform: scale(1);
+  transition-delay: 40ms;
+}
+
+
+/* ==========================================================================
+   [3] 화면 골격
+   ========================================================================== */
+
+/* 사이드바까지 포함해 화면 전체를 가운데로 모은다.
+   와이드 모니터에서 사이드바만 왼쪽 끝에 붙어 있으면 본문과 따로 놀아 보인다. */
+.shell {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  max-width: var(--layout-max);
+  margin-inline: auto;
+  min-height: calc(100vh - var(--appbar-h));
+}
+
+.snav {
+  position: sticky;
+  top: var(--appbar-h);
+  height: calc(100vh - var(--appbar-h));
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3xs);
+  padding: var(--spacing-md) var(--spacing-sm);
+  background: var(--bg-sidebar);
+  /* 라이트에서 사이드바는 본문과 같은 흰 면이다 — 이 선 하나가 유일한 경계이므로
+     --border-subtle 로는 사라진다. 문서의 .sidebar 와 같은 --border-default 를 쓴다 */
+  border-right: var(--border-width) solid var(--border-default);
+  overflow-y: auto;
+}
+
+.snav__link {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2xs);
+  padding: 11px var(--spacing-2xs);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-secondary);
+  transition: background var(--duration-hover), color var(--duration-hover);
+}
+
+.snav__link:hover {
+  background: var(--bg-sidebar-hover);
+  color: var(--text-heading);
+}
+
+.snav__link.is-active {
+  background: var(--fill-brand-soft);
+  color: var(--text-brand);
+}
+
+.snav__rule {
+  height: 1px;
+  background: var(--border-default);
+  margin: var(--spacing-2xs) var(--spacing-3xs);
+}
+
+.snav__promo {
+  margin-top: var(--spacing-md);
+}
+
+/* 브랜드명은 설명과 한 덩어리로 붙지 않게 한 칸 내린다 */
+.snav__promo .spec__value {
+  margin-top: var(--spacing-3xs);
+}
+
+/* 광고 카드와 LXP 버튼은 한 묶음이지만 성격이 달라 사이를 띄운다 */
+.snav__lxp {
+  margin-top: var(--spacing-xs);
+}
+
+/* 본문
+   클래스 이름을 .page 로 두면 안 된다 — 디자인 시스템의 .page 는 '문서 페이지'
+   레이아웃이라 flex 배치와 45vh 짜리 꼬리(::after)가 그대로 딸려 와,
+   마지막 섹션과 푸터 사이가 화면 높이의 절반만큼 벌어진다. */
+.mainpane {
+  max-width: 1480px;
+  padding: var(--spacing-md) var(--spacing-lg) var(--spacing-2xl);
+  box-sizing: border-box;
+}
+
+
+/* ==========================================================================
+   [4] 공통 조각
+   ========================================================================== */
+.search {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2xs);
+  padding: 13px var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+  border: var(--border-width) solid var(--border-input);
+  border-radius: var(--radius-md);
+  background: var(--bg-surface);
+}
+
+.search .icon {
+  color: var(--text-eyebrow);
+}
+
+.search input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  color: var(--text-primary);
+}
+
+.search input::placeholder {
+  color: var(--text-eyebrow);
+}
+
+/* 블록 — 제목 + 부연 + 오른쪽 링크가 한 줄에 놓이는 섹션 머리 */
+.block {
+  margin-bottom: var(--spacing-2xl);
+}
+
+.block__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-sm);
+}
+
+.block__left {
+  display: flex;
+  align-items: baseline;
+  gap: var(--spacing-2xs);
+  min-width: 0;
+}
+
+.block__title {
+  font-size: var(--font-size-subhead);
+  font-weight: var(--font-weight-bold);
+  color: var(--text-heading);
+}
+
+.block__tip {
+  font-size: var(--font-size-caption);
+  line-height: var(--line-height-snug);
+  color: var(--text-eyebrow);
+}
+
+.block__nav {
+  display: flex;
+  gap: 6px;
+  flex: none;
+}
+
+/* 상세 화면의 빵부스러기 — 뒤로 가는 길을 제목보다 먼저 보여 준다 */
+.crumb {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3xs);
+  margin-bottom: var(--spacing-sm);
+  font-size: var(--font-size-caption);
+  color: var(--text-tertiary);
+}
+
+.crumb a {
+  color: var(--text-tertiary);
+}
+
+.crumb a:hover {
+  color: var(--text-heading);
+}
+
+.crumb__here {
+  color: var(--text-heading);
+  font-weight: var(--font-weight-medium);
+}
+
+/* 띠지 — 한 줄짜리 바로가기 (라이브 예고 등) */
+.strip {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm) var(--spacing-md);
+  margin-bottom: var(--spacing-2xl);
+  border: var(--border-width) solid var(--border-default);
+  border-radius: var(--radius-md);
+  background: var(--bg-surface);
+  transition: border-color var(--duration-hover) var(--ease-out);
+}
+
+.strip:hover {
+  border-color: var(--border-strong);
+}
+
+.strip__title {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-heading);
+}
+
+.strip__cta {
+  margin-left: auto;
+  flex: none;
+}
+
+
+/* ==========================================================================
+   [5] 푸터
+   사이드바 색 블록과 맞닿지 않도록 위쪽 경계선은 화면 전체 폭으로 긋는다.
+   ========================================================================== */
+.foot {
+  border-top: var(--border-width) solid var(--border-default);
+}
+
+/* 푸터 로고는 브랜드색을 빼고 회색으로 — 본문의 민트와 경쟁하지 않게 */
+.foot__inner>img {
+  filter: grayscale(1);
+  opacity: .6;
+}
+
+/* 아래 여백은 화면 맨 끝이라 위쪽보다 넉넉해야 잘린 느낌이 들지 않는다 */
+.foot__inner {
+  max-width: var(--layout-max);
+  margin-inline: auto;
+  padding: var(--spacing-lg) var(--spacing-lg) var(--spacing-xl);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--spacing-xl);
+  flex-wrap: wrap;
+}
+
+.foot img {
+  height: 26px;
+  width: auto;
+  flex: none;
+}
+
+.foot__right {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  text-align: right;
+}
+
+.foot__addr {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: var(--font-size-caption);
+  line-height: var(--line-height-body);
+  color: var(--text-tertiary);
+}
+
+.foot__links {
+  display: flex;
+  gap: var(--spacing-2xs);
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  align-items: center;
+  font-size: var(--font-size-caption);
+}
+
+.foot__links a {
+  color: var(--text-tertiary);
+}
+
+.foot__links a:hover {
+  color: var(--text-heading);
+}
+
+.foot__sep {
+  color: var(--border-strong);
+}
+
+.foot__copy {
+  font-size: var(--font-size-caption);
+  color: var(--text-disabled);
+}
+
+
+/* ==========================================================================
+   [6] 반응형
+   ========================================================================== */
+@media (max-width: 1100px) {
+  .shell {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .snav {
+    position: static;
+    height: auto;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    border-right: 0;
+    border-bottom: var(--border-width) solid var(--border-subtle);
+  }
+
+  .snav__rule,
+  .snav__promo {
+    display: none;
+  }
+
+  .mainpane {
+    padding: 0 var(--spacing-md) var(--spacing-xl);
+  }
+}
+
+@media (max-width: 680px) {
+  .foot__inner {
+    flex-direction: column;
+  }
+
+  .foot__right {
+    text-align: left;
+  }
+
+  .foot__links {
+    justify-content: flex-start;
+  }
+}

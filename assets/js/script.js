@@ -7,6 +7,10 @@
    [4] 프로그레스
    [5] 데모 버튼 피드백
    [6] 사이드바 (모바일) + 스크롤 스파이
+   [7] 테마 전환
+   [8] 컴포넌트 인터랙션
+   [9] 모달
+   [10] 맨 위로
    ========================================================================== */
 
 (function () {
@@ -497,4 +501,124 @@
       if (m && m.classList.contains('select-list')) m.hidden = true;
     });
   });
+
+
+  /* ========================================================================
+     [9] 모달
+     [8]과 같은 방식입니다 — 마크업에 data-* 만 붙이면 이 파일을 고치지 않고
+     새 모달이 그대로 동작합니다.
+
+       [data-modal-open="id"]  여는 버튼
+       [data-modal-close]      닫는 지점 (스크림 · ✕ · 부정 버튼)
+       [data-modal-focus]      열었을 때 포커스를 받을 요소.
+                               되돌릴 수 없는 확인에서는 '부정' 버튼에 둡니다 —
+                               엔터를 연달아 눌러 지워 버리는 일을 막습니다.
+
+     닫는 방법(스크림 · ESC · 부정 버튼)은 모두 같은 결과여야 합니다.
+     "아무 일도 일어나지 않고 직전 상태로 돌아간다" — 이것이 부정의 정의입니다.
+     ======================================================================== */
+  var FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+  var openedModal = null;
+  var modalOpener = null;
+
+  function modalFocusables(modal) {
+    return Array.prototype.filter.call(modal.querySelectorAll(FOCUSABLE), function (el) {
+      return el.offsetParent !== null;
+    });
+  }
+
+  function showModal(modal, opener) {
+    if (openedModal) hideModal();
+    openedModal = modal;
+    modalOpener = opener || null;
+    modal.hidden = false;
+    document.body.classList.add('is-modal-open');
+
+    // 포커스를 모달 안으로 옮겨 놓아야 스크린리더가 바깥 문서를 계속 읽지 않습니다
+    var first = modal.querySelector('[data-modal-focus]') || modalFocusables(modal)[0];
+    if (first) first.focus();
+  }
+
+  function hideModal() {
+    if (!openedModal) return;
+    openedModal.hidden = true;
+    openedModal = null;
+    document.body.classList.remove('is-modal-open');
+    // 열기 전 있던 자리로 포커스를 돌려놓습니다
+    if (modalOpener && modalOpener.focus) modalOpener.focus();
+    modalOpener = null;
+  }
+
+  document.addEventListener('click', function (e) {
+    if (!e.target || !e.target.closest) return;
+
+    var opener = e.target.closest('[data-modal-open]');
+    if (opener) {
+      var target = document.getElementById(opener.getAttribute('data-modal-open'));
+      if (target) {
+        e.preventDefault();
+        showModal(target, opener);
+      }
+      return;
+    }
+
+    if (e.target.closest('[data-modal-close]')) hideModal();
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (!openedModal) return;
+
+    if (e.key === 'Escape') {
+      hideModal();
+      return;
+    }
+
+    /* 포커스 트랩 — 마지막에서 Tab, 첫 항목에서 Shift+Tab 이면 반대편으로 넘깁니다 */
+    if (e.key !== 'Tab') return;
+
+    var items = modalFocusables(openedModal);
+    if (!items.length) return;
+
+    var first = items[0];
+    var last = items[items.length - 1];
+
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
+    }
+  });
+
+
+  /* ========================================================================
+     [10] 맨 위로
+     이 문서는 body 가 아니라 .content 가 스크롤합니다 — 그쪽을 듣고 그쪽을 올립니다.
+     부드러움은 CSS 의 scroll-behavior 가 담당하므로(모션 최소화 설정도 거기서
+     함께 되돌립니다) 여기서는 목적지만 정합니다.
+     ======================================================================== */
+  var toTopBtn = document.getElementById('toTop');
+
+  if (toTopBtn) {
+    // 한 화면쯤 내려간 뒤에 나타납니다
+    var TOTOP_AT = 400;
+
+    var syncToTop = function () {
+      toTopBtn.classList.toggle('is-visible', content.scrollTop > TOTOP_AT);
+    };
+
+    content.addEventListener('scroll', syncToTop, { passive: true });
+
+    toTopBtn.addEventListener('click', function () {
+      content.scrollTop = 0;
+
+      /* 포커스도 함께 올립니다. 버튼은 곧 사라지므로(visibility:hidden) 포커스가
+         갈 곳을 만들어 두지 않으면 키보드 사용자는 문서 처음부터 다시 훑어야 합니다. */
+      content.setAttribute('tabindex', '-1');
+      content.focus({ preventScroll: true });
+    });
+
+    syncToTop();
+  }
 })();
